@@ -2,8 +2,8 @@ title:              SMC TECH blog
 email:              su99king@gmail.com
 description:        tgg
 author:             Shin Min Chul
-baseurl:            "https://github.com/su9king/su9king.github.io" 
-url:                ""
+baseurl:            """ 
+url:                "su9king.github.io"
 
 # Social Profiles
 twitter_username:   muetill
