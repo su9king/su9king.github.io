@@ -3,5 +3,5 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: home
-background: '/PATH_TO_IMAGE'
+background: 'img/posts/01.jpg'
 ---
