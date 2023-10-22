@@ -2,8 +2,8 @@ title:              SMC TECH blog
 email:              su99king@gmail.com
 description:        블로그 제작중 입니다.
 author:             Shin Min Chul
-baseurl:            "su9king.github.io"
-url:                ""
+baseurl:            ""
+url:                "su9king.github.io"
 
 # Social Profiles
 twitter_username:   muetill
