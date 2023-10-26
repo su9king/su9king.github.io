@@ -1,4 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-10-24T21:54:47+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">SMC’s Tech World</title><subtitle>블로그 제작중 입니다.</subtitle><author><name>Shin Min Chul</name></author><entry><title type="html">Development of blog plan</title><link href="http://localhost:4000/2023/10/24/Blog-plan.html" rel="alternate" type="text/html" title="Development of blog plan" /><published>2023-10-24T08:15:13+09:00</published><updated>2023-10-24T08:15:13+09:00</updated><id>http://localhost:4000/2023/10/24/Blog-plan</id><content type="html" xml:base="http://localhost:4000/2023/10/24/Blog-plan.html"><![CDATA[<h2 class="section-heading">The detailed process and goals</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-10-25T20:24:45+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">SMC’s Tech World</title><subtitle>블로그 제작중 입니다.</subtitle><author><name>Shin Min Chul</name></author><entry><title type="html">Create a math calculator using Java</title><link href="http://localhost:4000/2023/10/25/Java-project-plan.html" rel="alternate" type="text/html" title="Create a math calculator using Java" /><published>2023-10-25T08:15:13+09:00</published><updated>2023-10-25T08:15:13+09:00</updated><id>http://localhost:4000/2023/10/25/Java-project-plan</id><content type="html" xml:base="http://localhost:4000/2023/10/25/Java-project-plan.html"><![CDATA[<h2 class="section-heading">The goals</h2>
+
+<p>[1] 일반 사칙연산 결과값 및 인풋값 그래픽으로 표현</p>
+<p>[2] 행렬 기본개념 코드로 구현하여 그래픽으로 표현</p>
+
+
+<h2 class="section-heading">The process</h2>
+
+<p>[1] 자바 Swing 패키지 터득 및 이해하기 ( 2023.10.24 진행중~ )</p>
+
+
+
+<p>해당 페이지 기능추가 및 유지보수를 반드시 진행해야 합니다._ by SMC</p>]]></content><author><name>Shin Min Chul</name></author><summary type="html"><![CDATA[The goals]]></summary></entry><entry><title type="html">Development of blog plan</title><link href="http://localhost:4000/2023/10/24/Blog-plan.html" rel="alternate" type="text/html" title="Development of blog plan" /><published>2023-10-24T08:15:13+09:00</published><updated>2023-10-24T08:15:13+09:00</updated><id>http://localhost:4000/2023/10/24/Blog-plan</id><content type="html" xml:base="http://localhost:4000/2023/10/24/Blog-plan.html"><![CDATA[<h2 class="section-heading">The detailed process and goals</h2>
 
 <p>[1] <del>깃허브 외부저장소와 연동</del></p>
 <p>[2] <del>블로그 분위기 및 테마 설정</del></p>
