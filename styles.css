@@ -1,0 +1,213 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.highlight {
+    color: yellow; /* 강조할 색상 */
+    font-weight: bold; /* 강조를 위해 굵게 */
+}
+
+.container {
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+}
+
+.section, .section-special {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    color: white;
+    scroll-snap-align: start;
+    position: relative;
+    z-index: 1;
+    text-align: left; /* 텍스트를 왼쪽 정렬로 변경 */
+    padding: 0 20px; /* 좌우 여백 추가 */
+    width: 100%; /* 전체 너비 사용 */
+    line-height: 1.5; /* 줄 높이 조정 (기본값보다 넓게 설정) */
+}
+
+.section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    color: white;
+    scroll-snap-align: start;
+    position: relative;
+    z-index: 1;
+    text-align: left; /* 텍스트를 왼쪽 정렬로 변경 */
+    padding: 0 20px; /* 좌우 여백 추가 */
+    width: 100%; /* 전체 너비 사용 */
+}
+
+.section {
+    height: 100vh; /* 세션 높이를 화면 높이에 맞춤 */
+    background: rgba(0, 0, 0, 0.5);
+    flex-direction: column; /* 세로 방향으로 정렬 */
+}
+
+
+.section-special {
+    height: auto; /* 높이를 자동으로 조정 */
+    background: white;
+    color: black;
+    z-index: 2;
+    display: flex;
+    flex-direction: column; /* 세로 방향으로 배치 */
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    padding: 20px 0; /* 상하 패딩 추가 */
+    line-height: 1.5; /* 줄 높이 조정 */
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between; /* 버튼 간 간격을 일정하게 조정 */
+    width: 100%; /* 전체 너비 사용 */
+    flex-wrap: wrap; /* 버튼이 공간에 맞게 줄 바꿈 */
+    padding: 0 10px; /* 양쪽 패딩 추가 */
+}
+
+.button-item {
+    flex: 1 1 200px; /* 최소 너비 설정 */
+    display: flex;
+    flex-direction: column; /* 이미지 아래에 툴팁 배치 */
+    align-items: center; /* 중앙 정렬 */
+    margin: 10px; /* 버튼 간의 간격 */
+    position: relative; /* 툴팁의 위치를 버튼에 상대적으로 설정 */
+}
+
+.button-item img {
+    width: 120px; /* 이미지 크기 설정 */
+    height: 120px; /* 이미지 크기 설정 */
+    cursor: pointer; /* 마우스 커서 포인터로 변경 */
+}
+
+.button-item img:hover {
+    transform: scale(1.1); /* 마우스 오버 시 이미지 크기 확대 */
+}
+
+.button-item .tooltip {
+    visibility: hidden; /* 기본적으로 숨김 */
+    width: 220px; /* 툴팁 너비 */
+    background-color: black; /* 툴팁 배경색 */
+    color: white; /* 툴팁 텍스트 색상 */
+    text-align: center; /* 텍스트 정렬 */
+    border-radius: 5px; /* 테두리 둥글게 */
+    padding: 5px; /* 패딩 */
+    position: absolute; /* 위치 절대 설정 */
+    z-index: 10; /* 툴팁이 버튼 위에 나타나도록 설정 */
+    bottom: 125%; /* 버튼 위쪽으로 위치 조정 */
+    left: 50%;
+    transform: translateX(-50%); /* 중앙 정렬 */
+    opacity: 0; /* 초기 투명도 0 */
+    transition: opacity 0.3s; /* 투명도 전환 효과 */
+}
+
+.button-item img:hover + .tooltip {
+    visibility: visible; /* 이미지 위에 마우스가 있을 때 툴팁 보이도록 설정 */
+    opacity: 1; /* 투명도 1로 변경 */
+}
+
+
+
+
+@media (max-width: 600px) {
+    .button-container {
+        flex-direction: column; /* 세로 방향으로 배치 */
+        align-items: center; /* 중앙 정렬 */
+    }
+
+    .button-item {
+        flex: 1 1 auto; /* 최소 너비를 자동으로 설정 */
+        margin: 10px 0; /* 위아래 간격 조정 */
+    }
+
+    .button-item img {
+        max-width: 60px; /* 모바일 화면에서 이미지 최대 크기를 60px로 조정 */
+        max-height: 60px; /* 모바일 화면에서 이미지 최대 높이를 60px로 조정 */
+    }
+
+    .button-item .tooltip {
+        width: 90px; /* 모바일 화면에서 툴팁 너비 조정 */
+    }
+}
+
+
+#background-video, #background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#background-image {
+    opacity: 0;
+}
+
+/* 모바일 화면용 스타일 */
+/* 기존 코드 유지 */
+.section {
+    height: 100vh; /* 세션 높이를 화면 높이에 맞춤 */
+    background: rgba(0, 0, 0, 0.5);
+    flex-direction: column; /* 세로 방향으로 정렬 */
+}
+
+/* 모바일 화면용 스타일 */
+@media (max-width: 768px) {
+    .section {
+        font-size: 1.5em; /* 글자 크기 조정 */
+        padding: 10px;
+        flex-direction: column; /* 세로 방향으로 정렬 */
+    }
+
+    .section-special {
+        flex-direction: column; /* 모바일에서는 세로로 배치 */
+        height: auto; /* 높이 자동 조정 */
+    }
+
+    /* 텍스트 크기 조정 추가 */
+    .section, .section-special {
+        font-size: 1.2em; /* 모바일에서 글자 크기 조정 */
+    }
+
+    .button-container {
+        flex-direction: row; /* 모바일에서도 가로로 배치 */
+        flex-wrap: wrap; /* 버튼이 화면에 맞게 감싸지도록 */
+        justify-content: center;
+    }
+
+    #background-video, #background-image {
+        height: auto;
+        min-height: 100%;
+        object-fit: cover;
+    }
+}
+
+@media (max-width: 480px) {
+    .section {
+        font-size: 1em; /* 글자 크기 추가 조정 */
+        padding: 5px;
+        flex-direction: column; /* 세로 방향으로 정렬 */
+    }
+
+    .section-special {
+        height: auto; /* 높이 자동 조정 */
+    }
+
+    #background-video, #background-image {
+        height: auto;
+        min-height: 100%;
+        object-fit: cover;
+    }
+}
+
