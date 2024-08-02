@@ -2,7 +2,8 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden;
+    overflow-x: hidden; /* 좌우 스크롤 방지 */
+    overflow-y: scroll; /* 세로 스크롤 유지 */
 }
 
 .highlight {
@@ -12,8 +13,9 @@ body, html {
 
 .container {
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: scroll; /* 세로 스크롤 유지 */
     scroll-snap-type: y mandatory;
+    overflow-x: hidden; /* 좌우 스크롤 방지 */
 }
 
 .section, .section-special {
@@ -168,6 +170,7 @@ body, html {
         font-size: 1.5em; /* 글자 크기 조정 */
         padding: 10px;
         flex-direction: column; /* 세로 방향으로 정렬 */
+        overflow-x: hidden; /* 좌우 스크롤 방지 */
     }
 
     .section-special {
