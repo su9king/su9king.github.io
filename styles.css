@@ -1,216 +1,759 @@
-body, html {
+/* =========================================================
+   Min-cheol Shin — Software is Art
+   A cinematic personal site.
+   ========================================================= */
+
+:root {
+    --ink:       #f5efe2;        /* warm off-white, like aged film */
+    --ink-soft:  #c8c0ad;
+    --ink-quiet: #6a6357;
+    --gold:      #c9a35b;        /* projector light */
+    --gold-soft: #8e7237;
+    --bg:        #050402;        /* not pure black, slightly warm */
+    --bg-deep:   #000000;
+
+    --serif:    'Cormorant Garamond', 'Noto Serif KR', serif;
+    --serif-ko: 'Noto Serif KR', 'Cormorant Garamond', serif;
+    --sans:     'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --mono:     'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+
+    --letterbox: clamp(28px, 5.5vh, 64px);
+    --ease-cinema: cubic-bezier(0.65, 0.02, 0.30, 1);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow-x: hidden; /* 좌우 스크롤 방지 */
-    overflow-y: scroll; /* 세로 스크롤 유지 */
+    overflow: hidden;
+    background: var(--bg-deep);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    cursor: none;
 }
 
-.highlight {
-    color: yellow; /* 강조할 색상 */
-    font-weight: bold; /* 강조를 위해 굵게 */
-}
-
-.container {
-    height: 100%;
-    overflow-y: scroll; /* 세로 스크롤 유지 */
-    scroll-snap-type: y mandatory;
-    overflow-x: hidden; /* 좌우 스크롤 방지 */
-}
-
-.section, .section-special {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2em;
-    color: white;
-    scroll-snap-align: start;
-    position: relative;
-    z-index: 1;
-    text-align: left; /* 텍스트를 왼쪽 정렬로 변경 */
-    padding: 0 20px; /* 좌우 여백 추가 */
-    width: 100%; /* 전체 너비 사용 */
-    line-height: 1.5; /* 줄 높이 조정 (기본값보다 넓게 설정) */
-}
-
-.section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2em;
-    color: white;
-    scroll-snap-align: start;
-    position: relative;
-    z-index: 1;
-    text-align: left; /* 텍스트를 왼쪽 정렬로 변경 */
-    padding: 0 20px; /* 좌우 여백 추가 */
-    width: 100%; /* 전체 너비 사용 */
-}
-
-.section {
-    height: 100vh; /* 세션 높이를 화면 높이에 맞춤 */
-    background: rgba(0, 0, 0, 0.5);
-    flex-direction: column; /* 세로 방향으로 정렬 */
-}
-
-
-.section-special {
-    height: auto; /* 높이를 자동으로 조정 */
-    background: white;
-    color: black;
-    z-index: 2;
-    display: flex;
-    flex-direction: column; /* 세로 방향으로 배치 */
-    align-items: center;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-    padding: 20px 0; /* 상하 패딩 추가 */
-    line-height: 1.5; /* 줄 높이 조정 */
-}
-
-.button-container {
-    display: flex;
-    justify-content: space-between; /* 버튼 간 간격을 일정하게 조정 */
-    width: 100%; /* 전체 너비 사용 */
-    flex-wrap: wrap; /* 버튼이 공간에 맞게 줄 바꿈 */
-    padding: 0 10px; /* 양쪽 패딩 추가 */
-}
-
-.button-item {
-    flex: 1 1 200px; /* 최소 너비 설정 */
-    display: flex;
-    flex-direction: column; /* 이미지 아래에 툴팁 배치 */
-    align-items: center; /* 중앙 정렬 */
-    margin: 10px; /* 버튼 간의 간격 */
-    position: relative; /* 툴팁의 위치를 버튼에 상대적으로 설정 */
-}
-
-.button-item img {
-    width: 120px; /* 이미지 크기 설정 */
-    height: 120px; /* 이미지 크기 설정 */
-    cursor: pointer; /* 마우스 커서 포인터로 변경 */
-}
-
-.button-item img:hover {
-    transform: scale(1.1); /* 마우스 오버 시 이미지 크기 확대 */
-}
-
-.button-item .tooltip {
-    visibility: hidden; /* 기본적으로 숨김 */
-    width: 220px; /* 툴팁 너비 */
-    background-color: black; /* 툴팁 배경색 */
-    color: white; /* 툴팁 텍스트 색상 */
-    text-align: center; /* 텍스트 정렬 */
-    border-radius: 5px; /* 테두리 둥글게 */
-    padding: 5px; /* 패딩 */
-    position: absolute; /* 위치 절대 설정 */
-    z-index: 10; /* 툴팁이 버튼 위에 나타나도록 설정 */
-    bottom: 125%; /* 버튼 위쪽으로 위치 조정 */
-    left: 50%;
-    transform: translateX(-50%); /* 중앙 정렬 */
-    opacity: 0; /* 초기 투명도 0 */
-    transition: opacity 0.3s; /* 투명도 전환 효과 */
-}
-
-.button-item img:hover + .tooltip {
-    visibility: visible; /* 이미지 위에 마우스가 있을 때 툴팁 보이도록 설정 */
-    opacity: 1; /* 투명도 1로 변경 */
-}
-
-
-
-
-@media (max-width: 600px) {
-    .button-container {
-        flex-direction: column; /* 세로 방향으로 배치 */
-        align-items: center; /* 중앙 정렬 */
-    }
-
-    .button-item {
-        flex: 1 1 auto; /* 최소 너비를 자동으로 설정 */
-        margin: 10px 0; /* 위아래 간격 조정 */
-    }
-
-    .button-item img {
-        max-width: 60px; /* 모바일 화면에서 이미지 최대 크기를 60px로 조정 */
-        max-height: 60px; /* 모바일 화면에서 이미지 최대 높이를 60px로 조정 */
-    }
-
-    .button-item .tooltip {
-        width: 90px; /* 모바일 화면에서 툴팁 너비 조정 */
-    }
-}
-
-
-#background-video, #background-image {
+body::after {
+    /* a custom thin cursor */
+    content: '';
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 0; left: 0;
+    width: 8px; height: 8px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    background: transparent;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s ease;
+    --cx: 50%;
+    --cy: 50%;
+    left: var(--cx);
+    top: var(--cy);
+    mix-blend-mode: difference;
+}
+
+::selection { background: var(--gold); color: var(--bg-deep); }
+
+/* ---------- Background canvas, vignette, grain, letterbox ------- */
+
+#bg-canvas {
+    position: fixed;
+    inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
     z-index: 0;
-    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
 }
 
-#background-image {
+.vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center,
+        transparent 40%,
+        rgba(0, 0, 0, 0.55) 85%,
+        rgba(0, 0, 0, 0.85) 100%);
+}
+
+.grain {
+    position: fixed;
+    inset: -10%;
+    z-index: 6;
+    pointer-events: none;
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.8 0 0 0 0 0.8 0 0 0 0 0.8 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    animation: grain 0.9s steps(6) infinite;
+}
+
+@keyframes grain {
+    0%   { transform: translate(0, 0); }
+    20%  { transform: translate(-3%, 2%); }
+    40%  { transform: translate(2%, -1%); }
+    60%  { transform: translate(-1%, 3%); }
+    80%  { transform: translate(3%, 1%); }
+    100% { transform: translate(0, 0); }
+}
+
+.letterbox {
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: var(--letterbox);
+    background: var(--bg-deep);
+    z-index: 50;
+    pointer-events: none;
+    transition: transform 1.2s var(--ease-cinema);
+}
+.letterbox-top    { top: 0;    transform: translateY(-100%); }
+.letterbox-bottom { bottom: 0; transform: translateY(100%);  }
+.is-curtain-up .letterbox-top    { transform: translateY(0); }
+.is-curtain-up .letterbox-bottom { transform: translateY(0); }
+
+/* ---------- Scenes ---------- */
+
+.film {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100vh;
+}
+
+.scene {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--letterbox) + 4vh) 8vw;
     opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition:
+        opacity 1.4s var(--ease-cinema),
+        transform 1.4s var(--ease-cinema);
 }
 
-/* 모바일 화면용 스타일 */
-/* 기존 코드 유지 */
-.section {
-    height: 100vh; /* 세션 높이를 화면 높이에 맞춤 */
-    background: rgba(0, 0, 0, 0.5);
-    flex-direction: column; /* 세로 방향으로 정렬 */
+.scene.is-active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
-/* 모바일 화면용 스타일 */
+.scene.is-leaving {
+    opacity: 0;
+    transform: translateY(-12px);
+    transition:
+        opacity 0.7s var(--ease-cinema),
+        transform 0.7s var(--ease-cinema);
+}
+
+.scene-content {
+    position: relative;
+    z-index: 2;
+    max-width: 880px;
+    width: 100%;
+    text-align: center;
+}
+
+/* ---------- Scene 1: Title ---------- */
+
+.meta-line {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 300;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--ink-quiet);
+}
+
+.meta-name {
+    margin: 0.6em 0 0;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0.35em;
+    color: var(--ink-soft);
+}
+
+.title-spacer {
+    height: clamp(40px, 9vh, 100px);
+}
+
+.display {
+    margin: 0;
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(3.2rem, 11vw, 9rem);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+}
+
+.display-line {
+    display: block;
+}
+
+.display-em {
+    color: var(--gold);
+    font-style: italic;
+    font-weight: 400;
+}
+.display-em em {
+    font-style: normal;
+    font-family: var(--serif);
+    font-weight: 300;
+    color: var(--ink);
+    margin-right: 0.15em;
+}
+
+.display-translation {
+    margin: 1.6em 0 0;
+    font-family: var(--serif-ko);
+    font-size: clamp(0.85rem, 1.4vw, 1.05rem);
+    font-weight: 300;
+    letter-spacing: 0.4em;
+    color: var(--ink-quiet);
+}
+
+/* ---------- Scene 2 / 7: Prose ---------- */
+
+.scene-prose .scene-content { max-width: 760px; }
+
+.prose-line {
+    margin: 0;
+    font-family: var(--serif-ko);
+    font-weight: 300;
+    font-size: clamp(1.2rem, 2.4vw, 1.85rem);
+    line-height: 2.0;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+}
+
+.prose-line em {
+    font-style: italic;
+    color: var(--gold);
+    font-family: var(--serif);
+    font-weight: 400;
+}
+
+.prose-em {
+    margin-top: 0.6em;
+}
+
+/* ---------- Acts (3-6) ---------- */
+
+.scene-act .scene-content { max-width: 820px; }
+
+.act-roman {
+    margin: 0;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    color: var(--gold);
+    letter-spacing: 0.1em;
+}
+
+.act-title {
+    margin: 0.4em 0 0.25em;
+    font-family: var(--serif-ko);
+    font-weight: 400;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    line-height: 1.2;
+}
+
+.act-en {
+    margin: 0 0 2.2em;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(0.9rem, 1.4vw, 1.15rem);
+    letter-spacing: 0.18em;
+    color: var(--ink-quiet);
+    text-transform: uppercase;
+}
+
+.act-body {
+    margin: 0 auto;
+    max-width: 620px;
+    font-family: var(--serif-ko);
+    font-weight: 300;
+    font-size: clamp(1rem, 1.7vw, 1.25rem);
+    line-height: 2.0;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+}
+
+.act-body em {
+    font-style: italic;
+    color: var(--gold);
+    font-family: var(--serif);
+    font-weight: 400;
+}
+
+.act-body-quiet {
+    margin-top: 1.5em;
+    color: var(--ink-soft);
+    font-size: clamp(0.9rem, 1.4vw, 1.05rem);
+}
+
+.act-hint {
+    margin-top: 2.4em;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    color: var(--ink-quiet);
+    text-transform: uppercase;
+    opacity: 0.7;
+}
+
+/* ---------- Act III: Code block ---------- */
+
+.scene-code-act .scene-content { max-width: 820px; }
+
+.code-block {
+    display: inline-block;
+    text-align: left;
+    margin: 0.5em auto 1.6em;
+    padding: 1.6em 2em;
+    font-family: var(--mono);
+    font-size: clamp(0.7rem, 1.05vw, 0.95rem);
+    line-height: 1.85;
+    color: var(--ink-soft);
+    background: rgba(20, 16, 8, 0.5);
+    border: 1px solid rgba(201, 163, 91, 0.18);
+    border-left: 2px solid var(--gold);
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.4),
+        0 30px 80px -20px rgba(0, 0, 0, 0.8);
+    white-space: pre;
+    overflow-x: auto;
+    min-height: 16em;
+    min-width: min(560px, 80vw);
+    max-width: 100%;
+}
+
+.code-block .tk-kw   { color: var(--gold); }
+.code-block .tk-fn   { color: #d8c8a0; }
+.code-block .tk-str  { color: #b8c5a5; font-style: italic; }
+.code-block .tk-cmt  { color: var(--ink-quiet); font-style: italic; }
+.code-block .tk-pun  { color: var(--ink-quiet); }
+.code-block .tk-id   { color: var(--ink); }
+.code-block .caret {
+    display: inline-block;
+    width: 0.5em;
+    background: var(--gold);
+    margin-left: 1px;
+    animation: caret 1.0s steps(2) infinite;
+}
+@keyframes caret { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+
+/* ---------- Scene 8: Credits ---------- */
+
+.scene-credits {
+    align-items: stretch;
+    padding: 0;
+}
+
+.credits-viewport {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom,
+        transparent 0%,
+        black 18%,
+        black 82%,
+        transparent 100%);
+            mask-image: linear-gradient(to bottom,
+        transparent 0%,
+        black 18%,
+        black 82%,
+        transparent 100%);
+}
+
+.credits-roll {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%) translateY(100vh);
+    width: min(720px, 90vw);
+    text-align: center;
+    color: var(--ink);
+    transition: transform 0.4s var(--ease-cinema);
+}
+
+.scene-credits.is-active .credits-roll {
+    animation: roll 90s linear forwards;
+    animation-delay: 0.6s;
+}
+
+@keyframes roll {
+    from { transform: translateX(-50%) translateY(100vh); }
+    to   { transform: translateX(-50%) translateY(calc(-100% + 70vh)); }
+}
+
+.credit-spacer { height: 30vh; }
+.credit-spacer-end { height: 12vh; }
+
+.credit-block {
+    margin: 0 0 8vh;
+    padding: 0 1em;
+}
+
+.credit-headline { margin-bottom: 18vh; }
+
+.credit-fade {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    color: var(--gold);
+    letter-spacing: 0.4em;
+    margin: 0;
+}
+
+.credit-role {
+    margin: 0 0 1em;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 0.4em;
+    color: var(--ink-quiet);
+}
+
+.credit-name {
+    margin: 0;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+    letter-spacing: 0.08em;
+    color: var(--ink);
+}
+
+.credit-name-md {
+    font-size: clamp(1.3rem, 2.6vw, 1.8rem);
+    font-weight: 400;
+}
+
+.credit-name-sub {
+    margin: 0.4em 0 0;
+    font-family: var(--serif-ko);
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: var(--ink-soft);
+    letter-spacing: 0.15em;
+}
+
+.credit-line {
+    margin: 0.3em 0;
+    font-family: var(--serif-ko);
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+}
+
+.credit-table {
+    margin: 0 auto;
+    border-collapse: collapse;
+    font-family: var(--sans);
+    font-weight: 300;
+    font-size: 0.82rem;
+}
+.credit-table td {
+    padding: 0.45em 1em;
+    vertical-align: top;
+    color: var(--ink);
+    line-height: 1.5;
+}
+.credit-table td:first-child {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--gold-soft);
+    text-align: right;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+.credit-table td:last-child {
+    font-family: var(--serif-ko);
+    font-size: 0.92rem;
+    text-align: left;
+    letter-spacing: 0.02em;
+}
+
+.credit-contact { margin-top: 4vh; }
+
+.credit-link {
+    display: block;
+    margin: 0.3em 0;
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--gold);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+.credit-link:hover { color: var(--ink); }
+.credit-link-quiet { color: var(--ink-soft); font-size: 0.88rem; }
+
+.credit-link-row {
+    margin-top: 1.4em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6em;
+    flex-wrap: wrap;
+}
+.credit-link-mini {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    color: var(--ink-soft);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+.credit-link-mini:hover { color: var(--gold); }
+.credit-dot { color: var(--ink-quiet); }
+
+.credit-closing { margin-top: 8vh; }
+
+.credit-quote {
+    margin: 0 0 1em;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.05rem, 1.7vw, 1.3rem);
+    line-height: 1.7;
+    color: var(--gold);
+    letter-spacing: 0.02em;
+}
+.credit-quote-ko {
+    margin: 0;
+    font-family: var(--serif-ko);
+    font-weight: 300;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+}
+
+.credit-final { margin-top: 6vh; }
+
+.credit-final-line {
+    margin: 0.4em 0;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 300;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+.credit-final-quiet { color: var(--ink-quiet); }
+
+/* ---------- HUD ---------- */
+
+.hud {
+    position: fixed;
+    bottom: calc(var(--letterbox) - 22px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 70;
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    pointer-events: none;
+    opacity: 0.6;
+    transition: opacity 0.4s ease;
+}
+
+.hud-progress {
+    position: relative;
+    width: 200px;
+    height: 1px;
+}
+
+.hud-track {
+    position: absolute;
+    inset: 0;
+    background: rgba(245, 239, 226, 0.15);
+}
+
+.hud-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+    background: var(--gold);
+    transition: width 0.8s var(--ease-cinema);
+}
+
+.hud-counter {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    color: var(--ink-quiet);
+}
+
+/* ---------- Hint ---------- */
+
+.hint {
+    position: fixed;
+    bottom: calc(var(--letterbox) + 24px);
+    right: calc(8vw);
+    z-index: 70;
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    pointer-events: none;
+    color: var(--ink-quiet);
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    animation: hint-pulse 2.4s ease-in-out infinite;
+}
+
+.hint.is-visible {
+    opacity: 1;
+}
+
+.hint-key {
+    color: var(--gold);
+    font-size: 1rem;
+    transform: translateY(-1px);
+}
+
+@keyframes hint-pulse {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(4px); }
+}
+
+/* ---------- Lang toggle ---------- */
+
+.lang-toggle {
+    position: fixed;
+    top: calc(var(--letterbox) + 18px);
+    right: 8vw;
+    z-index: 70;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    color: var(--ink-quiet);
+}
+
+.lang-btn {
+    background: none;
+    border: none;
+    color: var(--ink-quiet);
+    font: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.3s ease;
+}
+
+.lang-btn:hover { color: var(--ink); }
+
+.lang-btn.is-active { color: var(--gold); }
+
+/* ---------- Reveal animation for text inside active scene ---------- */
+
+.scene .scene-content > * {
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+        opacity 1.0s var(--ease-cinema),
+        transform 1.0s var(--ease-cinema);
+}
+
+.scene.is-active .scene-content > * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.scene.is-active .scene-content > *:nth-child(1) { transition-delay: 0.30s; }
+.scene.is-active .scene-content > *:nth-child(2) { transition-delay: 0.55s; }
+.scene.is-active .scene-content > *:nth-child(3) { transition-delay: 0.80s; }
+.scene.is-active .scene-content > *:nth-child(4) { transition-delay: 1.05s; }
+.scene.is-active .scene-content > *:nth-child(5) { transition-delay: 1.30s; }
+.scene.is-active .scene-content > *:nth-child(6) { transition-delay: 1.55s; }
+.scene.is-active .scene-content > *:nth-child(7) { transition-delay: 1.80s; }
+
+/* ---------- Responsive ---------- */
+
 @media (max-width: 768px) {
-    .section {
-        font-size: 1.5em; /* 글자 크기 조정 */
-        padding: 10px;
-        flex-direction: column; /* 세로 방향으로 정렬 */
-        overflow-x: hidden; /* 좌우 스크롤 방지 */
+    :root { --letterbox: clamp(20px, 4vh, 36px); }
+
+    .scene { padding: calc(var(--letterbox) + 6vh) 6vw; }
+    .meta-line, .meta-name { letter-spacing: 0.3em; }
+    .display { font-size: clamp(2.6rem, 14vw, 4.4rem); }
+    .display-translation { letter-spacing: 0.3em; }
+
+    .prose-line { line-height: 1.85; }
+
+    .lang-toggle { right: 6vw; }
+    .hint { right: 6vw; bottom: calc(var(--letterbox) + 16px); font-size: 0.62rem; }
+    .hud { bottom: calc(var(--letterbox) - 14px); }
+    .hud-progress { width: 120px; }
+
+    .code-block {
+        padding: 1em 1.2em;
+        font-size: 0.7rem;
+        min-width: auto;
+        width: 100%;
+        min-height: 14em;
     }
 
-    .section-special {
-        flex-direction: column; /* 모바일에서는 세로로 배치 */
-        height: auto; /* 높이 자동 조정 */
-    }
+    body::after { display: none; }
+    html, body { cursor: auto; }
 
-    /* 텍스트 크기 조정 추가 */
-    .section, .section-special {
-        font-size: 1.2em; /* 모바일에서 글자 크기 조정 */
-    }
-
-    .button-container {
-        flex-direction: row; /* 모바일에서도 가로로 배치 */
-        flex-wrap: wrap; /* 버튼이 화면에 맞게 감싸지도록 */
-        justify-content: center;
-    }
-
-    #background-video, #background-image {
-        height: auto;
-        min-height: 100%;
-        object-fit: cover;
-    }
+    .credit-table td { padding: 0.4em 0.5em; }
+    .credit-table td:first-child { font-size: 0.7rem; }
+    .credit-table td:last-child { font-size: 0.85rem; }
 }
 
 @media (max-width: 480px) {
-    .section {
-        font-size: 1em; /* 글자 크기 추가 조정 */
-        padding: 5px;
-        flex-direction: column; /* 세로 방향으로 정렬 */
-    }
+    .scene { padding: calc(var(--letterbox) + 4vh) 5vw; }
+    .display { font-size: clamp(2.2rem, 16vw, 3.6rem); }
+    .prose-line { font-size: 1.05rem; }
+    .act-body { font-size: 0.95rem; line-height: 1.85; }
 
-    .section-special {
-        height: auto; /* 높이 자동 조정 */
-    }
-
-    #background-video, #background-image {
-        height: auto;
-        min-height: 100%;
-        object-fit: cover;
-    }
+    .credits-roll { width: 92vw; }
 }
 
+/* prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    .grain { animation: none; opacity: 0.04; }
+    .scene-credits.is-active .credits-roll {
+        animation: none;
+        transform: translateX(-50%) translateY(0);
+        position: relative;
+    }
+    .credits-viewport { overflow-y: auto; }
+    .hint { animation: none; }
+}
