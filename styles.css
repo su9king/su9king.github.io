@@ -449,74 +449,103 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ============================================================
-   Slides 18 / 19 — BIO  (style + tools philosophy)
+   Slide 18 — SIGNATURE / ABOUT (the comprehensive intro card)
+   The slide scrolls vertically if its contents exceed the viewport.
    ============================================================ */
-.slide-bio {
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+
+.slide-sign {
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0;
+    -webkit-overflow-scrolling: touch;
 }
 
-.bio-block {
-    max-width: 760px;
+.sign-scroll {
     width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 12vh 6vw 12vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4.5vh;
 }
 
-.bio-label {
-    margin: 0 0 1.8em;
+.sign-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45em;
+    margin: 0;
+}
+
+.sign-divider {
+    width: 60px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.35;
+}
+
+.sign-section {
+    width: 100%;
+    max-width: 620px;
+    margin: 0;
+}
+
+.sign-label {
+    margin: 0 0 1.2em;
     font-family: var(--sans);
-    font-weight: 300;
-    font-size: 0.7rem;
+    font-weight: 400;
+    font-size: 0.66rem;
     letter-spacing: 0.42em;
     text-transform: uppercase;
     color: var(--gold-deep);
 }
 
-.bio-line {
-    margin: 0.45em 0;
+.sign-line {
+    margin: 0.5em 0;
     font-family: var(--serif-ko);
     font-weight: 300;
-    font-size: clamp(1.05rem, 1.7vw, 1.35rem);
-    line-height: 1.85;
+    font-size: clamp(0.98rem, 1.4vw, 1.15rem);
+    line-height: 1.95;
     letter-spacing: 0.02em;
     color: var(--ink);
 }
 
-.bio-line em {
+.sign-line em {
     font-style: normal;
     color: var(--gold);
     font-family: var(--serif);
     font-weight: 400;
 }
 
-.bio-line-en {
-    margin-top: 1.8em;
-    font-family: var(--serif);
-    font-style: italic;
-    font-weight: 300;
-    font-size: clamp(0.78rem, 1vw, 0.92rem);
-    letter-spacing: 0.06em;
-    line-height: 1.7;
-    color: var(--ink-quiet);
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+.sign-contact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9em;
+    margin: 0;
 }
 
-.slide.is-active .bio-label  { animation: rise 1.4s var(--ease-soft) 0.2s both; }
-.slide.is-active .bio-line   { animation: rise 1.4s var(--ease-soft) 0.5s both; }
-.slide.is-active .bio-line:nth-of-type(2) { animation-delay: 0.7s; }
-.slide.is-active .bio-line:nth-of-type(3) { animation-delay: 0.9s; }
-.slide.is-active .bio-line-en { animation-delay: 1.2s; }
+/* Reveal everything as a single soft fade — many children would
+   otherwise stagger awkwardly. */
+.slide-sign.is-active .sign-scroll > * {
+    animation: rise 1.4s var(--ease-soft) both;
+}
+.slide-sign.is-active .sign-scroll > *:nth-child(1) { animation-delay: 0.20s; }
+.slide-sign.is-active .sign-scroll > *:nth-child(2) { animation-delay: 0.45s; }
+.slide-sign.is-active .sign-scroll > *:nth-child(3) { animation-delay: 0.65s; }
+.slide-sign.is-active .sign-scroll > *:nth-child(4) { animation-delay: 0.85s; }
+.slide-sign.is-active .sign-scroll > *:nth-child(5) { animation-delay: 1.05s; }
+.slide-sign.is-active .sign-scroll > *:nth-child(6) { animation-delay: 1.25s; }
+.slide-sign.is-active .sign-scroll > *:nth-child(7) { animation-delay: 1.45s; }
 
 /* ============================================================
-   Slide 20 — PYTHON STACK CARD
+   Python stack card (rendered inside the signature slide)
    ============================================================ */
-.slide-stack {
-    align-items: center;
-    justify-content: center;
-}
-
 .stack-card {
     max-width: 780px;
     width: 100%;
@@ -598,12 +627,10 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ============================================================
-   Slide 21 — SIGNATURE
+   Signature inner element styles
+   (scroll layout + animations are above; this section just
+   styles the individual pieces inside the sign-scroll wrapper)
    ============================================================ */
-.slide-sign {
-    gap: 0.4em;
-    text-align: center;
-}
 
 .sig-presents {
     margin: 0 0 1.6em;
@@ -653,7 +680,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .sig-mail {
-    margin-top: 1.8em;
+    margin: 0;
     font-family: var(--mono);
     font-size: clamp(0.9rem, 1.1vw, 1.05rem);
     color: var(--gold);
@@ -663,7 +690,7 @@ a { color: inherit; text-decoration: none; }
 .sig-mail:hover { color: var(--ink); }
 
 .sig-links {
-    margin-top: 1em;
+    margin: 0;
     display: flex;
     gap: 0.55em;
     align-items: center;
