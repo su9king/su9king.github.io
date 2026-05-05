@@ -616,6 +616,7 @@ const today = new Composition("be honest.");`;
         // [lowpass cutoff Hz, gain (0..1)]
         // The piece breathes shallowly through the setup, fills out as
         // we lay the proofs, and bursts open at slide 15 (the self-claim).
+        // After the climax it settles into the bio slides like a long exhale.
         const PROFILES = {
             1:  [ 500,  0.26],   // title
             2:  [ 580,  0.30],   // self-aware
@@ -633,8 +634,11 @@ const today = new Composition("be honest.");`;
             14: [16000, 0.94],   // who paints all of this?
             15: [22050, 1.00],   // SELF-CLAIM — peak, fully open
             16: [3000,  0.55],   // quiet poem
-            17: [1500,  0.42],   // devotion
-            18: [800,   0.00],   // signature fade-out
+            17: [1800,  0.46],   // devotion
+            18: [1500,  0.40],   // bio: style/approach
+            19: [1300,  0.36],   // bio: tools philosophy
+            20: [1100,  0.32],   // python stack card
+            21: [800,   0.00],   // signature fade-out
         };
 
         function attachDiagnostics() {
