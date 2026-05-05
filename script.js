@@ -1,137 +1,105 @@
 /* =========================================================
-   Min-cheol Shin — Software is Art
-   Cinematic interaction & background canvas.
+   Min Chul Shin — A Slideshow Argument that Software is Art
+
+   12 slides, manually advanced.
+   Web Audio composes a quiet ambient piece across the deck.
+   Per-slide animations carry each argument.
    ========================================================= */
 
 (function () {
     'use strict';
 
-    /* ---------- Constants ---------- */
-    const TOTAL_SCENES = 8;
-    const TRANSITION_LOCK_MS = 1100;
+    /* ===================== DOM ===================== */
+    const deck       = document.getElementById('deck');
+    const slides     = Array.from(document.querySelectorAll('.slide'));
+    const fillEl     = document.getElementById('progress-fill');
+    const hintEl     = document.getElementById('hint');
+    const flashEl    = document.getElementById('flash');
+    const audioBtn   = document.getElementById('hud-audio');
+    const bgmEl      = document.getElementById('bgm');
 
-    /* ---------- DOM ---------- */
-    const scenes      = document.querySelectorAll('.scene');
-    const hudFill     = document.getElementById('hud-fill');
-    const hudCounter  = document.getElementById('hud-counter');
-    const hint        = document.getElementById('hint');
-    const canvas      = document.getElementById('bg-canvas');
-    const ctx         = canvas.getContext('2d');
-    const codeBlock   = document.getElementById('code-block');
-    const langButtons = document.querySelectorAll('.lang-btn');
+    const TOTAL = slides.length;
 
-    /* ---------- State ---------- */
-    let currentScene = 1;
-    let isTransitioning = false;
-    let mode = 'idle';
-    let frame = 0;
-    let codeStarted = false;
-    let hintTimer = null;
-    let lang = 'ko';
+    /* ===================== ONE-TIME VIEW ===================== */
+    // The piece is meant to be experienced once. After the first page-load,
+    // returning visitors land directly on slide 12 (the signature).
+    // Append `?replay` to the URL to clear the flag and see the full show again.
+    const VISIT_KEY = 'mcs_software_is_art_seen_v1';
 
-    /* ---------- Resize ---------- */
-    let W = 0, H = 0, DPR = 1;
-    function resize() {
-        DPR = Math.min(window.devicePixelRatio || 1, 2);
-        W = window.innerWidth;
-        H = window.innerHeight;
-        canvas.width = W * DPR;
-        canvas.height = H * DPR;
-        canvas.style.width = W + 'px';
-        canvas.style.height = H + 'px';
-        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    function hasVisited() {
+        try { return localStorage.getItem(VISIT_KEY) === '1'; }
+        catch (_) { return false; }
     }
-    resize();
-    window.addEventListener('resize', resize);
+    function markVisited() {
+        try { localStorage.setItem(VISIT_KEY, '1'); } catch (_) {}
+    }
 
-    /* ---------- Custom cursor ---------- */
-    const cursor = {
-        x: window.innerWidth / 2,
-        y: window.innerHeight / 2,
-        lastMove: 0,
-    };
-    document.addEventListener('mousemove', (e) => {
-        cursor.x = e.clientX;
-        cursor.y = e.clientY;
-        cursor.lastMove = performance.now();
-        document.body.style.setProperty('--cx', cursor.x + 'px');
-        document.body.style.setProperty('--cy', cursor.y + 'px');
-    });
+    const params = new URLSearchParams(location.search);
+    if (params.has('replay')) {
+        try { localStorage.removeItem(VISIT_KEY); } catch (_) {}
+    }
+    const REVISIT = hasVisited();
 
-    /* ---------- Scene management ---------- */
-    function showScene(n) {
-        if (n < 1 || n > TOTAL_SCENES) return;
-        if (n === currentScene) return;
+    /* ===================== STATE ===================== */
+    let current = 1;
+    let isTransitioning = false;
+    const TRANSITION_LOCK_MS = 700;
+
+    /* ===================== SLIDE NAVIGATION ===================== */
+    function showSlide(n) {
+        if (n === current) return;
+        if (n < 1) n = 1;
+        if (n > TOTAL) n = TOTAL;
+
         isTransitioning = true;
+        const prev = slides[current - 1];
+        const next = slides[n - 1];
 
-        const prev = document.querySelector(`.scene[data-scene="${currentScene}"]`);
-        const next = document.querySelector(`.scene[data-scene="${n}"]`);
+        prev.classList.remove('is-active');
+        prev.classList.add('is-leaving');
+        setTimeout(() => prev.classList.remove('is-leaving'), 700);
 
-        if (prev) {
-            prev.classList.remove('is-active');
-            prev.classList.add('is-leaving');
-            setTimeout(() => prev.classList.remove('is-leaving'), 800);
-        }
-
-        currentScene = n;
+        current = n;
 
         setTimeout(() => {
-            if (next) next.classList.add('is-active');
+            next.classList.add('is-active');
             updateHUD();
-            updateMode();
-            scheduleHint();
-            if (n === 5) startCodeTyping();
+            triggerSlideEnter(n);
+            Music.onSlide(n);
             setTimeout(() => { isTransitioning = false; }, TRANSITION_LOCK_MS);
-        }, 380);
+        }, 250);
     }
 
-    function gotoNext() {
+    function advance() {
         if (isTransitioning) return;
-        if (currentScene < TOTAL_SCENES) {
-            showScene(currentScene + 1);
-        } else {
-            showScene(1);
-        }
-    }
-
-    function gotoPrev() {
-        if (isTransitioning) return;
-        if (currentScene > 1) showScene(currentScene - 1);
+        if (REVISIT) return;          // revisit lock: stays on slide 12
+        if (current === TOTAL) return; // no replay — once it's done, it's done
+        triggerFlash();
+        showSlide(current + 1);
     }
 
     function updateHUD() {
-        const pct = ((currentScene - 1) / (TOTAL_SCENES - 1)) * 100;
-        hudFill.style.width = pct + '%';
-        hudCounter.textContent =
-            String(currentScene).padStart(2, '0') + ' / ' +
-            String(TOTAL_SCENES).padStart(2, '0');
+        fillEl.style.width = ((current - 1) / (TOTAL - 1) * 100) + '%';
     }
 
-    function scheduleHint() {
-        hint.classList.remove('is-visible');
+    function triggerFlash() {
+        flashEl.classList.remove('is-flashing');
+        void flashEl.offsetWidth;
+        flashEl.classList.add('is-flashing');
+    }
+
+    /* ===================== HINT ===================== */
+    let hintTimer;
+    function showHintBriefly() {
+        hintEl.classList.add('is-visible');
         clearTimeout(hintTimer);
-        const hintText = hint.querySelector('.hint-text');
-        if (currentScene === TOTAL_SCENES) {
-            // hold the hint silent through the credits, then invite a replay
-            if (hintText) hintText.textContent = 'press to replay';
-            hintTimer = setTimeout(() => hint.classList.add('is-visible'), 92000);
-            return;
-        }
-        if (hintText) hintText.textContent = 'press any key';
-        hintTimer = setTimeout(() => hint.classList.add('is-visible'), 2400);
+        hintTimer = setTimeout(() => hintEl.classList.remove('is-visible'), 2400);
     }
 
-    function updateMode() {
-        const sceneEl = document.querySelector(`.scene[data-scene="${currentScene}"]`);
-        mode = (sceneEl && sceneEl.dataset.canvas) || 'idle';
-    }
-
-    /* ---------- Input handlers ---------- */
-
-    const IGNORED_KEYS = new Set([
-        'Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab',
-        'NumLock', 'ScrollLock', 'Escape', 'ContextMenu',
-        'AudioVolumeUp', 'AudioVolumeDown', 'AudioVolumeMute',
+    /* ===================== INPUT ===================== */
+    const IGNORED = new Set([
+        'Shift','Control','Alt','Meta','CapsLock','Tab','ContextMenu',
+        'NumLock','ScrollLock','AudioVolumeUp','AudioVolumeDown','AudioVolumeMute',
     ]);
 
     function shouldSkipForTarget(target) {
@@ -141,385 +109,132 @@
 
     document.addEventListener('keydown', (e) => {
         if (e.metaKey || e.ctrlKey || e.altKey) return;
-        if (IGNORED_KEYS.has(e.key)) return;
-        if (e.key && e.key.length > 1 && /^F\d+$/.test(e.key)) return;
+        if (IGNORED.has(e.key)) return;
+        if (/^F\d+$/.test(e.key)) return;
         if (shouldSkipForTarget(e.target)) return;
 
-        if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
-            e.preventDefault();
-            gotoPrev();
-            return;
-        }
+        Music.kickstart(); // first user gesture unlocks audio
 
+        // Forward-only navigation. There is no going back.
         e.preventDefault();
-        gotoNext();
+        advance();
     });
 
     document.addEventListener('click', (e) => {
         if (shouldSkipForTarget(e.target)) return;
-        gotoNext();
+        Music.kickstart();
+        advance();
     });
 
     document.addEventListener('touchstart', (e) => {
         if (shouldSkipForTarget(e.target)) return;
-        // do not preventDefault to allow scrolling for credits if needed
-        gotoNext();
+        Music.kickstart();
+        advance();
     }, { passive: true });
 
-    let wheelLock = 0;
-    document.addEventListener('wheel', (e) => {
-        if (isTransitioning) return;
-        if (Math.abs(e.deltaY) < 12) return;
-        const now = performance.now();
-        if (now - wheelLock < 700) return;
-        wheelLock = now;
-        if (e.deltaY > 0) gotoNext(); else gotoPrev();
-    }, { passive: true });
-
-    /* ---------- Lang toggle ---------- */
-
-    const COPY = {
-        ko: {
-            'meta-presents': 'a film by',
-            'display-translation': '소프트웨어는 예술이다.',
-            'prologue': [
-                '전통의 예술이 캔버스 위에 메시지를 그렸다면,',
-                '오늘의 소프트웨어는 모니터라는 캔버스 위에서',
-                '사용자와 <em>실시간으로</em> 호흡하며',
-                '새로운 문화를 그려낸다.',
-            ],
-            'act-1-title': '인터페이스의 미학',
-            'act-1-en':    'Aesthetics of Interaction',
-            'act-1-body':  '타이포그래피와 색, 여백과 모션.<br>잘 만들어진 인터페이스를 탐색할 때<br>우리는 <em>갤러리를 거니는 듯한</em> 몰입을 느낀다.',
-            'act-1-hint':  '— 마우스를 움직여 보세요',
-            'act-2-title': '보이지 않는 것의 시각화',
-            'act-2-en':    'Visualizing the Invisible',
-            'act-2-body':  '수백만 건의 트랜잭션, 메모리의 흐름, 런타임의 병목.<br>눈에 보이지 않는 시스템의 호흡을<br>한 장의 그래프로 <em>조각해내는</em> 일.',
-            'act-3-title': '코드의 구조미',
-            'act-3-en':    'The Visual Structure of Code',
-            'act-3-body-q':'"코드가 아름답다"라고 말할 때, 우리는<br>논리의 완벽함과 함께 <em>형태의 안정감</em>을 본다.',
-            'act-4-title': '새로운 창작의 패러다임',
-            'act-4-en':    'A New Paradigm of Creation',
-            'act-4-body':  '소프트웨어는 더 이상 정보를 소비하는 매체가 아니다.<br>이제 그것은 <em>예술을 생성하고 탐구하는 주체</em>다.',
-            'epilogue': [
-                '결국 소프트웨어는',
-                '인간과 기계를 잇는 번역기이며,',
-                '<em>우리 시대의 가장 거대한 시각 예술의 캔버스다.</em>',
-            ],
-        },
-        en: {
-            'meta-presents': 'a film by',
-            'display-translation': '소프트웨어는 예술이다.',
-            'prologue': [
-                'If classical art drew its message on canvas,',
-                'today\'s software paints on the canvas of a screen —',
-                'breathing with the user <em>in real time,</em>',
-                'and shaping a new culture.',
-            ],
-            'act-1-title': 'Aesthetics of Interaction',
-            'act-1-en':    '인터페이스의 미학',
-            'act-1-body':  'Typography and color, white space and motion.<br>When you explore a well-crafted interface,<br>you feel <em>as though wandering through a gallery.</em>',
-            'act-1-hint':  '— move your cursor',
-            'act-2-title': 'Visualizing the Invisible',
-            'act-2-en':    '보이지 않는 것의 시각화',
-            'act-2-body':  'Millions of transactions, memory flowing, runtimes throttled.<br>To <em>sculpt</em> the unseen breath of a system<br>into a single, legible graph.',
-            'act-3-title': 'The Visual Structure of Code',
-            'act-3-en':    '코드의 구조미',
-            'act-3-body-q':'When we say <em>"the code is beautiful,"</em><br>we mean both the logic — and the form.',
-            'act-4-title': 'A New Paradigm of Creation',
-            'act-4-en':    '새로운 창작의 패러다임',
-            'act-4-body':  'Software is no longer just a medium of consumption.<br>It has become <em>a creator and an explorer</em> of art itself.',
-            'epilogue': [
-                'In the end, software',
-                'is a translator between human and machine —',
-                '<em>the largest canvas of visual art in our time.</em>',
-            ],
-        },
-    };
-
-    function applyLang(L) {
-        lang = L;
-        const C = COPY[L];
-
-        document.querySelectorAll('.meta-presents').forEach(el => el.textContent = C['meta-presents']);
-        document.querySelector('.display-translation').textContent = C['display-translation'];
-
-        // prologue
-        const prologue = document.querySelectorAll('[data-scene="2"] .prose-line');
-        C.prologue.forEach((t, i) => prologue[i] && (prologue[i].innerHTML = t));
-
-        // acts
-        const setIn = (sel, html) => { const el = document.querySelector(sel); if (el) el.innerHTML = html; };
-        setIn('[data-scene="3"] .act-title', C['act-1-title']);
-        setIn('[data-scene="3"] .act-en',    C['act-1-en']);
-        setIn('[data-scene="3"] .act-body',  C['act-1-body']);
-        setIn('[data-scene="3"] .act-hint',  C['act-1-hint']);
-        setIn('[data-scene="4"] .act-title', C['act-2-title']);
-        setIn('[data-scene="4"] .act-en',    C['act-2-en']);
-        setIn('[data-scene="4"] .act-body',  C['act-2-body']);
-        setIn('[data-scene="5"] .act-title', C['act-3-title']);
-        setIn('[data-scene="5"] .act-en',    C['act-3-en']);
-        setIn('[data-scene="5"] .act-body',  C['act-3-body-q']);
-        setIn('[data-scene="6"] .act-title', C['act-4-title']);
-        setIn('[data-scene="6"] .act-en',    C['act-4-en']);
-        setIn('[data-scene="6"] .act-body',  C['act-4-body']);
-
-        // epilogue
-        const epi = document.querySelectorAll('[data-scene="7"] .prose-line');
-        C.epilogue.forEach((t, i) => epi[i] && (epi[i].innerHTML = t));
-
-        document.documentElement.lang = (L === 'ko') ? 'ko' : 'en';
-        langButtons.forEach(b => b.classList.toggle('is-active', b.dataset.lang === L));
-    }
-
-    langButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            applyLang(btn.dataset.lang);
-        });
+    /* ===================== AUDIO TOGGLE ===================== */
+    audioBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        Music.toggle();
     });
 
-    /* ---------- Background canvases ---------- */
+    /* ===================== PER-SLIDE ANIMATIONS ===================== */
 
-    // Idle drift dust (used as base ambient)
-    const dust = Array.from({ length: 70 }, () => ({
-        x: Math.random(),
-        y: Math.random(),
-        z: Math.random() * 0.8 + 0.2,
-        vx: (Math.random() - 0.5) * 0.00015,
-        vy: (Math.random() - 0.5) * 0.00015,
-    }));
-
-    // Cursor trail
-    const trail = [];
-
-    // Topology
-    const N_NODES = 14;
-    const nodes = Array.from({ length: N_NODES }, () => ({
-        x: Math.random(),
-        y: Math.random(),
-        r: 1.8 + Math.random() * 1.6,
-        pulse: Math.random() * Math.PI * 2,
-        load: Math.random(),
-    }));
-    const edges = [];
-    for (let i = 0; i < nodes.length; i++) {
-        const dists = [];
-        for (let j = 0; j < nodes.length; j++) {
-            if (i === j) continue;
-            dists.push({ j, d: Math.hypot(nodes[j].x - nodes[i].x, nodes[j].y - nodes[i].y) });
-        }
-        dists.sort((a, b) => a.d - b.d);
-        for (let k = 0; k < 2; k++) {
-            const j = dists[k].j;
-            const exists = edges.some(e =>
-                (e.a === i && e.b === j) || (e.a === j && e.b === i)
-            );
-            if (!exists) edges.push({ a: i, b: j, packets: [] });
+    function triggerSlideEnter(n) {
+        switch (n) {
+            case 4: SlideAnim.startNegative(); break;
+            case 5: /* CSS handles the 3D reveal */ break;
+            case 6: SlideAnim.startMusic(); break;
+            case 7: SlideAnim.startSculpture(); break;
+            case 8: SlideAnim.startBrush(); break;
         }
     }
 
-    // Generative particles
-    const particles = Array.from({ length: 90 }, () => ({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        vx: 0,
-        vy: 0,
-        age: Math.random() * 200,
-    }));
+    /* ============================================================
+       SLIDE 4: Negative Space Inversion
+       ============================================================ */
+    const negativeCanvas = document.getElementById('negative-canvas');
+    const negativeCtx    = negativeCanvas.getContext('2d');
 
-    // pseudo-noise (sin-based)
-    function noise2D(x, y) {
-        return (
-            Math.sin(x * 12.9898 + y * 78.233) * 0.5 +
-            Math.sin(x * 39.346 + y * 11.135 + 1.7) * 0.3 +
-            Math.sin(x * 5.123  + y * 27.842 + 3.1) * 0.2
-        );
-    }
+    // UI element rectangles (normalized 0..1 within canvas).
+    // Together they recall a phone home / chat layout.
+    const UI_BOXES = [
+        // header
+        [0.06, 0.04, 0.88, 0.06],
+        // search bar
+        [0.06, 0.13, 0.88, 0.04],
+        // story rail (5 circles → represented as small squares)
+        [0.06, 0.20, 0.10, 0.10],
+        [0.18, 0.20, 0.10, 0.10],
+        [0.30, 0.20, 0.10, 0.10],
+        [0.42, 0.20, 0.10, 0.10],
+        [0.54, 0.20, 0.10, 0.10],
+        [0.66, 0.20, 0.10, 0.10],
+        [0.78, 0.20, 0.10, 0.10],
+        // post 1
+        [0.06, 0.34, 0.88, 0.04], // username row
+        [0.06, 0.40, 0.88, 0.22], // image
+        [0.06, 0.64, 0.30, 0.03], // caption
+        [0.06, 0.69, 0.55, 0.03],
+        // post 2 begin
+        [0.06, 0.78, 0.88, 0.04],
+        [0.06, 0.86, 0.88, 0.10],
+    ];
 
-    function drawDust() {
-        ctx.fillStyle = 'rgba(245, 239, 226, 1)';
-        for (const d of dust) {
-            d.x += d.vx;
-            d.y += d.vy;
-            if (d.x < 0) d.x = 1; else if (d.x > 1) d.x = 0;
-            if (d.y < 0) d.y = 1; else if (d.y > 1) d.y = 0;
-            const size = d.z * 1.4;
-            ctx.globalAlpha = d.z * 0.22;
-            ctx.beginPath();
-            ctx.arc(d.x * W, d.y * H, size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-    }
+    /* ============================================================
+       SLIDE 6: Observability sparklines
+       ============================================================ */
+    const musicCanvas = document.getElementById('music-canvas');
+    const musicCtx    = musicCanvas.getContext('2d');
+    const musicTracks = [
+        { name: 'HEARTBEAT',  buf: new Array(64).fill(0), kind: 'wave',  bpm: 60 },
+        { name: 'MEMORY',     buf: new Array(64).fill(0), kind: 'area',  bpm: 30 },
+        { name: 'LATENCY',    buf: new Array(40).fill(0), kind: 'cells', bpm: 90 },
+        { name: 'THROUGHPUT', buf: new Array(64).fill(0), kind: 'spark', bpm: 75 },
+    ];
 
-    function drawCursorTrail() {
-        drawDust();
-        // only emit particles while the cursor is actually moving (recent move)
-        if (performance.now() - cursor.lastMove < 80) {
-            trail.push({
-                x: cursor.x,
-                y: cursor.y,
-                life: 1,
-                size: 5 + Math.random() * 8,
-            });
-        }
-        if (trail.length > 120) trail.splice(0, trail.length - 120);
-        for (let i = 0; i < trail.length; i++) {
-            const t = trail[i];
-            t.life -= 0.014;
-            if (t.life <= 0) continue;
-            ctx.globalAlpha = t.life * 0.55;
-            ctx.fillStyle = '#c9a35b';
-            ctx.beginPath();
-            ctx.arc(t.x, t.y, t.size * t.life, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        // remove dead
-        for (let i = trail.length - 1; i >= 0; i--) {
-            if (trail[i].life <= 0) trail.splice(i, 1);
-        }
-        ctx.globalAlpha = 1;
-    }
+    /* ============================================================
+       SLIDE 7: Code sculpture
+       ============================================================ */
+    const sculptureCode = document.getElementById('sculpture-code');
+    const SCULPTURE_TEXT =
+`// architecture has weight.
 
-    function drawTopology() {
-        // edges first
-        for (const e of edges) {
-            const a = nodes[e.a], b = nodes[e.b];
-            const ax = a.x * W, ay = a.y * H;
-            const bx = b.x * W, by = b.y * H;
-            ctx.strokeStyle = 'rgba(201, 163, 91, 0.18)';
-            ctx.lineWidth = 0.7;
-            ctx.beginPath();
-            ctx.moveTo(ax, ay);
-            ctx.lineTo(bx, by);
-            ctx.stroke();
+class Composition {
+  constructor(intent) {
+    this.intent  = intent;
+    this.medium  = software;
+    this.gestures = [];
+  }
 
-            if (Math.random() < 0.012) {
-                e.packets.push({ t: 0, dir: Math.random() < 0.5 ? 1 : -1, speed: 0.008 + Math.random() * 0.01 });
-            }
-            for (let i = e.packets.length - 1; i >= 0; i--) {
-                const p = e.packets[i];
-                p.t += p.speed * p.dir;
-                if (p.t > 1 || p.t < 0) {
-                    e.packets.splice(i, 1);
-                    continue;
-                }
-                const px = ax + (bx - ax) * p.t;
-                const py = ay + (by - ay) * p.t;
-                ctx.fillStyle = '#c9a35b';
-                ctx.shadowColor = '#c9a35b';
-                ctx.shadowBlur = 14;
-                ctx.beginPath();
-                ctx.arc(px, py, 2, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.shadowBlur = 0;
-        }
+  paint(stroke) {
+    return this.gestures
+      .map(g => g.transform(stroke))
+      .filter(g => g.is_truthful())
+      .reduce((canvas, g) => g.apply(canvas));
+  }
+}
 
-        // nodes
-        for (const n of nodes) {
-            n.pulse += 0.025;
-            const pulse = 1 + Math.sin(n.pulse) * 0.25;
-            const x = n.x * W, y = n.y * H;
-            ctx.fillStyle = 'rgba(245, 239, 226, 0.9)';
-            ctx.beginPath();
-            ctx.arc(x, y, n.r * pulse, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(201, 163, 91, 0.35)';
-            ctx.lineWidth = 0.5;
-            ctx.beginPath();
-            ctx.arc(x, y, n.r * pulse + 5, 0, Math.PI * 2);
-            ctx.stroke();
-        }
-    }
+const today = new Composition("be honest.");`;
 
-    function drawGenerative() {
-        // fade trail
-        ctx.fillStyle = 'rgba(5, 4, 2, 0.07)';
-        ctx.fillRect(0, 0, W, H);
-        for (const p of particles) {
-            const angle = noise2D(p.x * 0.0028, p.y * 0.0028 + frame * 0.0009) * Math.PI * 2;
-            p.vx = (p.vx + Math.cos(angle) * 0.05) * 0.96;
-            p.vy = (p.vy + Math.sin(angle) * 0.05) * 0.96;
-            p.x += p.vx;
-            p.y += p.vy;
-            p.age++;
-            if (p.x < -10 || p.x > W + 10 || p.y < -10 || p.y > H + 10 || p.age > 380) {
-                p.x = Math.random() * W;
-                p.y = Math.random() * H;
-                p.age = 0;
-                p.vx = 0; p.vy = 0;
-            }
-            ctx.fillStyle = 'rgba(201, 163, 91, 0.65)';
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 1.1, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-
-    function drawCodeBg() {
-        // soft horizontal lines, slowly drifting (like a film leader)
-        ctx.strokeStyle = 'rgba(201, 163, 91, 0.045)';
-        ctx.lineWidth = 1;
-        const offset = (frame * 0.4) % 32;
-        for (let y = -offset; y < H; y += 32) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(W, y);
-            ctx.stroke();
-        }
-        drawDust();
-    }
-
-    function tick() {
-        frame++;
-        ctx.clearRect(0, 0, W, H);
-
-        switch (mode) {
-            case 'cursor':     drawCursorTrail(); break;
-            case 'topology':   drawTopology();    break;
-            case 'generative': drawGenerative();  break;
-            case 'code':       drawCodeBg();      break;
-            default:           drawDust();
-        }
-
-        requestAnimationFrame(tick);
-    }
-
-    /* ---------- Code typing for Act III ---------- */
-
-    const CODE_TEXT =
-`// software is a canvas
-
-const software = (intent) => {
-    const meaning = think(intent);
-    const form    = shape(meaning);
-    const beauty  = refine(form);
-    return beauty;
-};
-
-// for me, it has always been
-//   not a tool, but a canvas.
-
-software("hello, world.");`;
-
-    const KEYWORDS = new Set(['const', 'return', 'let', 'var', 'new', 'class', 'function', 'if', 'else', 'for']);
-    const FNS      = new Set(['software', 'think', 'shape', 'refine']);
+    const KW  = new Set(['class','const','let','var','return','new','this','if','else','=>']);
+    const FN  = new Set(['constructor','paint','transform','is_truthful','apply','reduce','filter','map','Composition']);
+    const PROP_AFTER = new Set(['.', '?.']);
 
     function escapeHTML(s) {
-        return s
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 
     function tokenize(text) {
         const out = [];
         let i = 0;
+        const isAlpha = (c) => /[a-zA-Z_$]/.test(c);
+        const isAlnum = (c) => /[a-zA-Z0-9_$]/.test(c);
+        const isDigit = (c) => /[0-9]/.test(c);
+
         while (i < text.length) {
             const c = text[i];
-
             if (c === '/' && text[i + 1] === '/') {
                 let end = text.indexOf('\n', i);
                 if (end === -1) end = text.length;
@@ -527,7 +242,6 @@ software("hello, world.");`;
                 i = end;
                 continue;
             }
-
             if (c === '"' || c === "'") {
                 const q = c;
                 let j = i + 1;
@@ -539,32 +253,41 @@ software("hello, world.");`;
                 i = j + 1;
                 continue;
             }
-
-            if (/[a-zA-Z_$]/.test(c)) {
+            if (isDigit(c)) {
                 let j = i;
-                while (j < text.length && /[a-zA-Z0-9_$]/.test(text[j])) j++;
-                const word = text.slice(i, j);
-                let t = 'id';
-                if (KEYWORDS.has(word)) t = 'kw';
-                else if (FNS.has(word)) t = 'fn';
-                out.push({ t, v: word });
+                while (j < text.length && /[0-9.]/.test(text[j])) j++;
+                out.push({ t: 'num', v: text.slice(i, j) });
                 i = j;
                 continue;
             }
+            if (isAlpha(c)) {
+                let j = i;
+                while (j < text.length && isAlnum(text[j])) j++;
+                const word = text.slice(i, j);
 
+                let k = i - 1;
+                while (k >= 0 && /\s/.test(text[k])) k--;
+                const isProperty = (k >= 0 && text[k] === '.');
+
+                let type = 'id';
+                if (KW.has(word))         type = 'kw';
+                else if (FN.has(word))    type = 'fn';
+                if (isProperty)           type = 'prop';
+
+                out.push({ t: type, v: word });
+                i = j;
+                continue;
+            }
             if (c === '=' && text[i + 1] === '>') {
-                out.push({ t: 'pun', v: '=>' });
+                out.push({ t: 'kw', v: '=>' });
                 i += 2;
                 continue;
             }
-
-            if (/[(){}\[\];,.:=>+\-*/]/.test(c)) {
+            if ('(){}[];:,.=+-*/<>!?&|'.includes(c)) {
                 out.push({ t: 'pun', v: c });
                 i++;
                 continue;
             }
-
-            // whitespace and other
             out.push({ t: 'ws', v: c });
             i++;
         }
@@ -580,47 +303,555 @@ software("hello, world.");`;
         return html;
     }
 
-    function startCodeTyping() {
-        if (codeStarted) {
-            codeBlock.innerHTML = tokensToHTML(tokenize(CODE_TEXT)) +
-                                 '<span class="caret"></span>';
-            return;
-        }
-        codeStarted = true;
-        codeBlock.innerHTML = '';
-        let i = 0;
+    /* ============================================================
+       SLIDE 8: AI brush
+       ============================================================ */
+    const brushPromptEl = document.getElementById('brush-prompt');
+    const brushCanvas   = document.getElementById('brush-canvas');
+    const brushCtx      = brushCanvas.getContext('2d');
+    const BRUSH_PROMPT  = "draw the soul of code";
 
-        function step() {
-            if (currentScene !== 5) return;
-            if (i > CODE_TEXT.length) return;
-            const partial = CODE_TEXT.slice(0, i);
-            codeBlock.innerHTML = tokensToHTML(tokenize(partial)) +
-                                 '<span class="caret"></span>';
-            const ch = CODE_TEXT.charAt(i);
-            i++;
-            let delay;
-            if (ch === '\n')      delay = 130;
-            else if (ch === ' ')  delay = 22;
-            else                  delay = 30 + Math.random() * 28;
-            setTimeout(step, delay);
+    /* ===================== ANIMATION SUB-MODULE ===================== */
+    const SlideAnim = (() => {
+
+        // ---- Slide 4: Negative space ----
+        let negStart = 0;
+        let negRunning = false;
+
+        function startNegative() {
+            sizeCanvas(negativeCanvas, negativeCtx);
+            negStart = performance.now();
+            negRunning = true;
+            requestAnimationFrame(loopNegative);
         }
 
-        setTimeout(step, 1100);
+        function loopNegative(t) {
+            if (!negRunning) return;
+            if (current !== 4) { negRunning = false; return; }
+
+            const dt = (t - negStart) / 1000;
+
+            const w = negativeCanvas.clientWidth;
+            const h = negativeCanvas.clientHeight;
+
+            // Phase A (0..2.0s): show the UI as gray-on-dark.
+            // Phase B (2.0..4.5s): UI dissolves; negative space fills with gold.
+            // Phase C (4.5+): hold gold whitespace pattern.
+
+            const phaseA = clamp01((dt - 0.0) / 1.4);                  // UI fades in
+            const inverse = clamp01((dt - 2.0) / 2.5);                 // 0..1 inversion
+            const ui_alpha = 1 - inverse;
+            const gold_alpha = inverse;
+
+            negativeCtx.clearRect(0, 0, w, h);
+
+            if (gold_alpha > 0.001) {
+                // Fill the entire stage with gold, then knock out the UI rectangles.
+                negativeCtx.fillStyle = `rgba(201, 163, 91, ${0.85 * gold_alpha})`;
+                negativeCtx.fillRect(0, 0, w, h);
+                // Punch holes for the UI rectangles using destination-out.
+                negativeCtx.globalCompositeOperation = 'destination-out';
+                for (const box of UI_BOXES) {
+                    const [x, y, bw, bh] = box;
+                    const margin = (1 - clamp01((dt - 2.0) / 1.6)) * 6;
+                    negativeCtx.fillStyle = 'rgba(0, 0, 0, 1)';
+                    negativeCtx.fillRect(
+                        x * w - margin, y * h - margin,
+                        bw * w + margin * 2, bh * h + margin * 2
+                    );
+                }
+                negativeCtx.globalCompositeOperation = 'source-over';
+            }
+
+            if (ui_alpha > 0.001) {
+                // Draw the gray UI rectangles on top while they fade.
+                negativeCtx.fillStyle = `rgba(245, 239, 226, ${0.18 * ui_alpha * phaseA})`;
+                for (const box of UI_BOXES) {
+                    const [x, y, bw, bh] = box;
+                    negativeCtx.fillRect(x * w, y * h, bw * w, bh * h);
+                }
+                // outline
+                negativeCtx.strokeStyle = `rgba(245, 239, 226, ${0.12 * ui_alpha * phaseA})`;
+                negativeCtx.lineWidth = 1;
+                for (const box of UI_BOXES) {
+                    const [x, y, bw, bh] = box;
+                    negativeCtx.strokeRect(x * w + 0.5, y * h + 0.5, bw * w - 1, bh * h - 1);
+                }
+            }
+
+            requestAnimationFrame(loopNegative);
+        }
+
+        // ---- Slide 6: Sparklines + music kicks in ----
+        let musicStart = 0;
+        let musicRunning = false;
+
+        function startMusic() {
+            sizeCanvas(musicCanvas, musicCtx);
+            musicStart = performance.now();
+            musicRunning = true;
+            requestAnimationFrame(loopMusic);
+        }
+
+        function loopMusic(t) {
+            if (!musicRunning) return;
+            if (current !== 6) { musicRunning = false; return; }
+
+            const w = musicCanvas.clientWidth;
+            const h = musicCanvas.clientHeight;
+            const dt = (t - musicStart) / 1000;
+
+            musicCtx.clearRect(0, 0, w, h);
+
+            // Layout: 4 horizontal tracks
+            const padL = Math.max(120, w * 0.08);
+            const padR = Math.max(60, w * 0.05);
+            const padT = h * 0.18;
+            const padB = h * 0.22;
+            const innerW = w - padL - padR;
+            const innerH = h - padT - padB;
+            const trackH = innerH / musicTracks.length;
+            const valX = padL + 100;
+            const valW = w - valX - padR;
+
+            for (let i = 0; i < musicTracks.length; i++) {
+                const tr = musicTracks[i];
+                const ty = padT + i * trackH;
+                const cy = ty + trackH * 0.5;
+
+                // label
+                musicCtx.fillStyle = 'rgba(106, 99, 87, 1)';
+                musicCtx.font = `400 11px 'Inter', sans-serif`;
+                musicCtx.textBaseline = 'middle';
+                musicCtx.textAlign = 'left';
+                musicCtx.fillText(tr.name.split('').join('  '), padL, cy);
+
+                // shift buffer
+                const phase = (dt * tr.bpm / 60) * Math.PI * 2;
+                const newVal = Math.max(0, Math.min(1,
+                    0.5 + Math.sin(phase + i) * 0.3 + (Math.random() - 0.5) * 0.15
+                ));
+                tr.buf.shift();
+                tr.buf.push(newVal);
+
+                // draw
+                if (tr.kind === 'wave') {
+                    drawWaveTrack(musicCtx, valX, ty, valW, trackH, tr, dt);
+                } else if (tr.kind === 'area') {
+                    drawAreaTrack(musicCtx, valX, ty, valW, trackH, tr);
+                } else if (tr.kind === 'cells') {
+                    drawCellsTrack(musicCtx, valX, ty, valW, trackH, tr);
+                } else if (tr.kind === 'spark') {
+                    drawSparkTrack(musicCtx, valX, ty, valW, trackH, tr);
+                }
+            }
+
+            requestAnimationFrame(loopMusic);
+        }
+
+        function drawWaveTrack(ctx, x, y, w, h, tr, dt) {
+            const cy = y + h * 0.5;
+            const intensity = 0.7;
+            ctx.strokeStyle = `rgba(201, 163, 91, ${0.55 + intensity * 0.4})`;
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            const N = Math.max(60, Math.floor(w / 3));
+            for (let i = 0; i <= N; i++) {
+                const px = x + (i / N) * w;
+                const phase = (i / N) * Math.PI * 4 - dt * 2.4;
+                let py = cy + Math.sin(phase) * h * 0.16;
+                const sp = ((i / N) * 4 - dt * 0.7 / Math.PI) % 1;
+                if (sp > 0.45 && sp < 0.55) {
+                    const k = (sp - 0.5) / 0.05;
+                    py -= Math.sign(k) * h * 0.30 * (1 - Math.abs(k));
+                }
+                if (i === 0) ctx.moveTo(px, py);
+                else         ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        }
+
+        function drawAreaTrack(ctx, x, y, w, h, tr) {
+            const buf = tr.buf;
+            const N = buf.length;
+            const cy = y + h * 0.5;
+            const range = h * 0.4;
+
+            const grad = ctx.createLinearGradient(x, 0, x + w, 0);
+            grad.addColorStop(0, 'rgba(201, 163, 91, 0.5)');
+            grad.addColorStop(1, 'rgba(201, 163, 91, 0.85)');
+            ctx.fillStyle = grad;
+
+            ctx.beginPath();
+            ctx.moveTo(x, cy);
+            for (let i = 0; i < N; i++) {
+                const px = x + (i / (N - 1)) * w;
+                const py = cy - (buf[i] - 0.5) * range;
+                ctx.lineTo(px, py);
+            }
+            ctx.lineTo(x + w, cy);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawCellsTrack(ctx, x, y, w, h, tr) {
+            const buf = tr.buf;
+            const N = buf.length;
+            const cellW = w / N;
+            const cellH = h * 0.55;
+            const cy = y + h * 0.5 - cellH * 0.5;
+            for (let i = 0; i < N; i++) {
+                const v = buf[i];
+                const a = 0.10 + v * 0.85;
+                ctx.fillStyle = v > 0.7
+                    ? `rgba(201, 163, 91, ${a})`
+                    : `rgba(245, 239, 226, ${a * 0.7})`;
+                ctx.fillRect(x + i * cellW + 0.5, cy, Math.max(1, cellW - 1.5), cellH);
+            }
+        }
+
+        function drawSparkTrack(ctx, x, y, w, h, tr) {
+            const buf = tr.buf;
+            const N = buf.length;
+            const cy = y + h * 0.5;
+            const range = h * 0.42;
+            ctx.strokeStyle = 'rgba(245, 239, 226, 0.85)';
+            ctx.lineWidth = 1.0;
+            ctx.beginPath();
+            for (let i = 0; i < N; i++) {
+                const px = x + (i / (N - 1)) * w;
+                const py = cy - (buf[i] - 0.5) * range;
+                if (i === 0) ctx.moveTo(px, py);
+                else         ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        }
+
+        // ---- Slide 7: code sculpture ----
+        function startSculpture() {
+            sculptureCode.innerHTML = tokensToHTML(tokenize(SCULPTURE_TEXT));
+        }
+
+        // ---- Slide 8: AI brush ----
+        let brushStart = 0;
+        let brushRunning = false;
+        let brushPromptText = '';
+        let brushTypeIdx = 0;
+        const brushParticles = [];
+
+        function startBrush() {
+            sizeCanvas(brushCanvas, brushCtx);
+            brushStart = performance.now();
+            brushRunning = true;
+            brushPromptText = '';
+            brushTypeIdx = 0;
+            brushParticles.length = 0;
+            updateBrushPrompt();
+            requestAnimationFrame(loopBrush);
+        }
+
+        function updateBrushPrompt() {
+            brushPromptEl.innerHTML =
+                escapeHTML(brushPromptText) +
+                '<span class="brush-cursor">▌</span>';
+        }
+
+        function loopBrush(t) {
+            if (!brushRunning) return;
+            if (current !== 8) { brushRunning = false; return; }
+
+            const dt = (t - brushStart) / 1000;
+            const w = brushCanvas.clientWidth;
+            const h = brushCanvas.clientHeight;
+
+            // Type the prompt over the first ~3 seconds.
+            const charTarget = Math.min(BRUSH_PROMPT.length, Math.floor(dt * 7));
+            if (charTarget !== brushTypeIdx) {
+                brushTypeIdx = charTarget;
+                brushPromptText = BRUSH_PROMPT.slice(0, charTarget);
+                updateBrushPrompt();
+            }
+
+            // Once typing is done, start emitting particles from a flow field.
+            if (dt > BRUSH_PROMPT.length / 7 + 0.2 && brushParticles.length < 600) {
+                for (let i = 0; i < 8; i++) {
+                    brushParticles.push({
+                        x: w * 0.5 + (Math.random() - 0.5) * w * 0.3,
+                        y: h * 0.55,
+                        vx: 0, vy: 0,
+                        age: 0,
+                        life: 200 + Math.random() * 240,
+                        hue: Math.random(),
+                    });
+                }
+            }
+
+            // Soft trail-fade.
+            brushCtx.fillStyle = 'rgba(10, 8, 5, 0.045)';
+            brushCtx.fillRect(0, 0, w, h);
+
+            // Update + draw particles in flow field
+            const FX = (x, y, t) =>
+                Math.sin((x * 0.005) + (y * 0.003) + t * 0.3) * 0.6 +
+                Math.cos((x * 0.0023) - (y * 0.004) - t * 0.2) * 0.4;
+            const FY = (x, y, t) =>
+                Math.cos((x * 0.0033) - (y * 0.0021) + t * 0.4) * 0.5 +
+                Math.sin((x * 0.0017) + (y * 0.0036) - t * 0.18) * 0.5;
+
+            for (let i = brushParticles.length - 1; i >= 0; i--) {
+                const p = brushParticles[i];
+                const ax = FX(p.x, p.y, dt) * 0.12;
+                const ay = FY(p.x, p.y, dt) * 0.12;
+                p.vx = (p.vx + ax) * 0.96;
+                p.vy = (p.vy + ay) * 0.96;
+                p.x += p.vx;
+                p.y += p.vy;
+                p.age++;
+                if (p.age > p.life || p.x < -10 || p.x > w + 10 || p.y < -10 || p.y > h + 10) {
+                    brushParticles.splice(i, 1);
+                    continue;
+                }
+                const alpha = 0.6 * Math.min(1, p.age / 30) * (1 - p.age / p.life);
+                brushCtx.fillStyle = p.hue > 0.5
+                    ? `rgba(201, 163, 91, ${alpha})`
+                    : `rgba(245, 239, 226, ${alpha * 0.7})`;
+                brushCtx.beginPath();
+                brushCtx.arc(p.x, p.y, 1.0, 0, Math.PI * 2);
+                brushCtx.fill();
+            }
+
+            requestAnimationFrame(loopBrush);
+        }
+
+        function reset() {
+            negRunning = false;
+            musicRunning = false;
+            brushRunning = false;
+            brushParticles.length = 0;
+            negativeCtx.clearRect(0, 0, negativeCanvas.width, negativeCanvas.height);
+            musicCtx.clearRect(0, 0, musicCanvas.width, musicCanvas.height);
+            brushCtx.clearRect(0, 0, brushCanvas.width, brushCanvas.height);
+        }
+
+        return {
+            startNegative, startMusic, startSculpture, startBrush, reset,
+        };
+    })();
+
+    /* ===================== CANVAS SIZING ===================== */
+    function sizeCanvas(canvas, ctx) {
+        const DPR = Math.min(window.devicePixelRatio || 1, 2);
+        const r = canvas.getBoundingClientRect();
+        canvas.width  = Math.max(1, Math.round(r.width  * DPR));
+        canvas.height = Math.max(1, Math.round(r.height * DPR));
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     }
 
-    /* ---------- Init ---------- */
+    window.addEventListener('resize', () => {
+        // Re-size canvases for the active slide.
+        if (current === 4) sizeCanvas(negativeCanvas, negativeCtx);
+        if (current === 6) sizeCanvas(musicCanvas, musicCtx);
+        if (current === 8) sizeCanvas(brushCanvas, brushCtx);
+    });
 
+    /* ===================== MUSIC =====================
+       Plays a single MP3 file (`music.mp3` in the repo root) on loop.
+       To create the sense of *intensity growing toward the climax*, we
+       route the audio through a Web Audio lowpass filter + gain whose
+       cutoff and volume ramp upward across the slides:
+
+         · slide 1   → muffled, quiet (cutoff 500 Hz, vol 0.30)
+         · slide 10  → wide-open, loud (cutoff 22 kHz, vol 1.00)
+         · slide 11  → pull back (cutoff 1.2 kHz, vol 0.55)
+         · slide 12  → fade out
+
+       So even if the underlying track is just a steady piece, the listener
+       feels the music open up as the argument intensifies.
+       If music.mp3 is missing the site still works, just silently. */
+
+    const Music = (() => {
+        let ctx       = null;
+        let source    = null;
+        let filter    = null;
+        let gain      = null;
+        let muted     = false;
+        let started   = false;
+        let baseVolume = 0;
+        let elementRamp = 0; // rAF id for fallback element-volume ramping
+
+        // Per-slide intensity profile.
+        // [filterHz, gain]
+        const PROFILES = {
+            1:  [ 500,  0.30],
+            2:  [ 700,  0.36],
+            3:  [ 950,  0.44],
+            4:  [1300,  0.52],
+            5:  [1800,  0.60],
+            6:  [2600,  0.68],
+            7:  [4000,  0.76],
+            8:  [7000,  0.84],
+            9:  [12000, 0.92],
+            10: [22050, 1.00],   // peak — fully open, full volume
+            11: [1400,  0.55],   // pull back for the quiet poem
+            12: [800,   0.00],   // fade out as signature settles
+        };
+
+        function attachDiagnostics() {
+            if (!bgmEl) return;
+            bgmEl.addEventListener('error', () => {
+                const err = bgmEl.error;
+                console.warn('[bgm] audio element error:',
+                    err ? `code=${err.code} (${err.message})` : 'unknown',
+                    'src=', bgmEl.currentSrc || bgmEl.src);
+            });
+            bgmEl.addEventListener('loadedmetadata', () => {
+                console.info('[bgm] loaded:', bgmEl.currentSrc, 'duration=', bgmEl.duration);
+            });
+            bgmEl.addEventListener('stalled', () => console.warn('[bgm] stalled'));
+        }
+
+        function setupWebAudio() {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return false;
+            try {
+                ctx = new AudioCtx();
+                source = ctx.createMediaElementSource(bgmEl);
+                filter = ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 500;
+                filter.Q.value = 0.7;
+                gain = ctx.createGain();
+                gain.gain.value = 0;
+                source.connect(filter);
+                filter.connect(gain);
+                gain.connect(ctx.destination);
+                return true;
+            } catch (e) {
+                // Web Audio failed (e.g. CORS taint, browser quirk).
+                // Fall back to playing the audio element directly.
+                console.warn('[bgm] Web Audio routing failed, using element fallback:', e);
+                ctx = null; source = null; filter = null; gain = null;
+                return false;
+            }
+        }
+
+        function rampElementVolume(target, durSec) {
+            cancelAnimationFrame(elementRamp);
+            const start = bgmEl.volume;
+            const startTime = performance.now();
+            function step() {
+                const t = (performance.now() - startTime) / 1000;
+                const k = Math.min(1, t / Math.max(0.05, durSec));
+                bgmEl.volume = Math.max(0, Math.min(1, start + (target - start) * k));
+                if (k < 1) elementRamp = requestAnimationFrame(step);
+            }
+            step();
+        }
+
+        function applyProfile(slide, fadeDur = 2.6) {
+            const p = PROFILES[slide];
+            if (!p) return;
+            const [freq, vol] = p;
+            baseVolume = vol;
+            const target = muted ? 0 : vol;
+
+            if (ctx && filter && gain) {
+                const tNow = ctx.currentTime;
+                filter.frequency.cancelScheduledValues(tNow);
+                filter.frequency.setValueAtTime(filter.frequency.value, tNow);
+                filter.frequency.exponentialRampToValueAtTime(Math.max(80, freq), tNow + fadeDur);
+
+                gain.gain.cancelScheduledValues(tNow);
+                gain.gain.setValueAtTime(gain.gain.value, tNow);
+                gain.gain.linearRampToValueAtTime(target, tNow + fadeDur);
+            } else if (bgmEl) {
+                // Element-only fallback: volume only, no filter sweep.
+                rampElementVolume(target, fadeDur);
+            }
+        }
+
+        function kickstart() {
+            if (started) return;
+            if (!bgmEl) return;
+            started = true;
+
+            attachDiagnostics();
+
+            // Attempt Web Audio routing. If it fails, we still play the element directly.
+            const haveWebAudio = setupWebAudio();
+
+            // If element-only fallback, start with volume 0 so we can ramp it in.
+            if (!haveWebAudio) bgmEl.volume = 0;
+
+            // Resume the audio context if the browser created it suspended.
+            if (ctx && ctx.state === 'suspended') {
+                ctx.resume().catch((err) => console.warn('[bgm] resume failed:', err));
+            }
+
+            // Always attempt to play the element.
+            const playP = bgmEl.play();
+            if (playP && playP.catch) {
+                playP.catch((err) => {
+                    console.warn('[bgm] play() rejected — file may be missing or blocked:',
+                        err && err.message);
+                });
+            }
+
+            applyProfile(typeof current === 'number' ? current : 1, 0.8);
+        }
+
+        function onSlide(n) {
+            applyProfile(n);
+        }
+
+        function toggle() {
+            muted = !muted;
+            audioBtn.setAttribute('aria-pressed', String(!muted));
+            const target = muted ? 0 : baseVolume;
+            if (ctx && gain) {
+                const tNow = ctx.currentTime;
+                gain.gain.cancelScheduledValues(tNow);
+                gain.gain.setValueAtTime(gain.gain.value, tNow);
+                gain.gain.linearRampToValueAtTime(target, tNow + 0.6);
+            } else if (bgmEl) {
+                rampElementVolume(target, 0.6);
+            }
+        }
+
+        return { kickstart, onSlide, toggle };
+    })();
+
+    /* ===================== UTIL ===================== */
+    function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+    /* ===================== INIT ===================== */
     function init() {
-        // raise the curtain after first render
-        setTimeout(() => {
-            document.body.classList.add('is-curtain-up');
-        }, 600);
-        applyLang('ko');
-        updateHUD();
-        updateMode();
-        scheduleHint();
-        tick();
-    }
+        // Pre-size canvases that might appear later.
+        sizeCanvas(negativeCanvas, negativeCtx);
+        sizeCanvas(musicCanvas, musicCtx);
+        sizeCanvas(brushCanvas, brushCtx);
 
+        if (REVISIT) {
+            // The visitor has been here before. Show only slide 12.
+            slides.forEach(s => s.classList.remove('is-active'));
+            const sig = slides[TOTAL - 1];
+            sig.classList.add('is-active');
+            current = TOTAL;
+            // Hide the "click to begin again" — there is no beginning again.
+            const replay = sig.querySelector('.sig-replay');
+            if (replay) replay.remove();
+            // Mark progress as full and disable the hint entirely.
+            fillEl.style.width = '100%';
+            document.body.classList.add('is-revisit');
+        } else {
+            // First visit. Mark them now — strict one-shot.
+            markVisited();
+            setTimeout(showHintBriefly, 1800);
+            triggerSlideEnter(1);
+        }
+
+        updateHUD();
+    }
     init();
+
 })();

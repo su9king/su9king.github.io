@@ -3,227 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Min-cheol Shin — Software is Art</title>
-    <meta name="description" content="A film by Min-cheol Shin. Software is Art.">
-    <meta name="theme-color" content="#000000">
+    <title>Min Chul Shin · 신민철</title>
+    <meta name="description" content="A slideshow argument that software is art. By Min Chul Shin.">
+    <meta name="theme-color" content="#0a0805">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Noto+Serif+KR:wght@300;400;500&family=Inter:wght@200;300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Noto+Serif+KR:wght@200;300;400&family=Inter:wght@200;300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <canvas id="bg-canvas" aria-hidden="true"></canvas>
-    <div class="vignette" aria-hidden="true"></div>
     <div class="grain" aria-hidden="true"></div>
-    <div class="letterbox letterbox-top" aria-hidden="true"></div>
-    <div class="letterbox letterbox-bottom" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
 
-    <main class="film">
-        <!-- Scene 1: Title Card -->
-        <section class="scene scene-title is-active" data-scene="1">
-            <div class="scene-content">
-                <p class="meta-line meta-presents">a film by</p>
-                <p class="meta-name">MIN-CHEOL SHIN</p>
-                <div class="title-spacer"></div>
-                <h1 class="display">
-                    <span class="display-line">Software</span>
-                    <span class="display-line display-em"><em>is</em> Art.</span>
-                </h1>
-                <p class="display-translation">소프트웨어는 예술이다.</p>
+    <main class="deck" id="deck">
+
+        <!-- ════════════ ACT I — DECLARATION ════════════ -->
+
+        <!-- 1: TITLE -->
+        <section class="slide slide-title is-active" data-slide="1">
+            <h1 class="title-ko">소프트웨어는 예술이다.</h1>
+            <p class="title-en">Software is Art.</p>
+        </section>
+
+        <!-- 2: PROVOCATION -->
+        <section class="slide slide-prose" data-slide="2">
+            <p class="line-ko">아마 안 믿으실 겁니다.</p>
+            <p class="line-en">You don't believe me.</p>
+        </section>
+
+        <!-- 3: PROMISE -->
+        <section class="slide slide-prose" data-slide="3">
+            <p class="line-ko">딱 네 가지만 보여드리겠습니다.</p>
+            <p class="line-en">Watch four things with me.</p>
+            <div class="promise-dots" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
             </div>
         </section>
 
-        <!-- Scene 2: Prologue -->
-        <section class="scene scene-prose" data-scene="2">
-            <div class="scene-content">
-                <p class="prose-line">전통의 예술이 캔버스 위에 메시지를 그렸다면,</p>
-                <p class="prose-line">오늘의 소프트웨어는 모니터라는 캔버스 위에서</p>
-                <p class="prose-line">사용자와 <em>실시간으로</em> 호흡하며</p>
-                <p class="prose-line">새로운 문화를 그려낸다.</p>
+        <!-- ════════════ ACT II — FOUR PROOFS ════════════ -->
+
+        <!-- 4: UI = NEGATIVE SPACE -->
+        <section class="slide slide-negative" data-slide="4">
+            <div class="negative-stage" id="negative-stage">
+                <canvas id="negative-canvas"></canvas>
+            </div>
+            <div class="caption">
+                <p class="cap-ko">그림은, 사실 <em>빈 자리</em>에 있었습니다.</p>
+                <p class="cap-en">The real painting was in the empty spaces.</p>
             </div>
         </section>
 
-        <!-- Act I -->
-        <section class="scene scene-act" data-scene="3" data-canvas="cursor">
-            <div class="scene-content">
-                <p class="act-roman">I</p>
-                <h2 class="act-title">인터페이스의 미학</h2>
-                <p class="act-en">Aesthetics of Interaction</p>
-                <p class="act-body">
-                    타이포그래피와 색, 여백과 모션.<br>
-                    잘 만들어진 인터페이스를 탐색할 때<br>
-                    우리는 <em>갤러리를 거니는 듯한</em> 몰입을 느낀다.
-                </p>
-                <p class="act-hint">— 마우스를 움직여 보세요</p>
-            </div>
-        </section>
-
-        <!-- Act II -->
-        <section class="scene scene-act" data-scene="4" data-canvas="topology">
-            <div class="scene-content">
-                <p class="act-roman">II</p>
-                <h2 class="act-title">보이지 않는 것의 시각화</h2>
-                <p class="act-en">Visualizing the Invisible</p>
-                <p class="act-body">
-                    수백만 건의 트랜잭션, 메모리의 흐름, 런타임의 병목.<br>
-                    눈에 보이지 않는 시스템의 호흡을<br>
-                    한 장의 그래프로 <em>조각해내는</em> 일.
-                </p>
-            </div>
-        </section>
-
-        <!-- Act III -->
-        <section class="scene scene-act scene-code-act" data-scene="5" data-canvas="code">
-            <div class="scene-content">
-                <p class="act-roman">III</p>
-                <h2 class="act-title">코드의 구조미</h2>
-                <p class="act-en">The Visual Structure of Code</p>
-                <pre class="code-block" id="code-block"></pre>
-                <p class="act-body act-body-quiet">
-                    "코드가 아름답다"라고 말할 때, 우리는<br>
-                    논리의 완벽함과 함께 <em>형태의 안정감</em>을 본다.
-                </p>
-            </div>
-        </section>
-
-        <!-- Act IV -->
-        <section class="scene scene-act" data-scene="6" data-canvas="generative">
-            <div class="scene-content">
-                <p class="act-roman">IV</p>
-                <h2 class="act-title">새로운 창작의 패러다임</h2>
-                <p class="act-en">A New Paradigm of Creation</p>
-                <p class="act-body">
-                    소프트웨어는 더 이상 정보를 소비하는 매체가 아니다.<br>
-                    이제 그것은 <em>예술을 생성하고 탐구하는 주체</em>다.
-                </p>
-            </div>
-        </section>
-
-        <!-- Epilogue -->
-        <section class="scene scene-prose scene-epilogue" data-scene="7">
-            <div class="scene-content">
-                <p class="prose-line">결국 소프트웨어는</p>
-                <p class="prose-line">인간과 기계를 잇는 번역기이며,</p>
-                <p class="prose-line prose-em"><em>우리 시대의 가장 거대한 시각 예술의 캔버스다.</em></p>
-            </div>
-        </section>
-
-        <!-- End Credits -->
-        <section class="scene scene-credits" data-scene="8">
-            <div class="credits-viewport">
-                <div class="credits-roll" id="credits-roll">
-                    <div class="credit-spacer"></div>
-
-                    <div class="credit-block credit-headline">
-                        <p class="credit-fade">— FIN —</p>
-                    </div>
-
-                    <div class="credit-block">
-                        <p class="credit-role">Directed &amp; Written by</p>
-                        <p class="credit-name">MIN-CHEOL SHIN</p>
-                        <p class="credit-name-sub">신민철 · b. 2001</p>
-                    </div>
-
-                    <div class="credit-block">
-                        <p class="credit-role">A Dreamer of</p>
-                        <p class="credit-name credit-name-md">Software Architecture</p>
-                    </div>
-
-                    <div class="credit-block">
-                        <p class="credit-role">Currently Performing at</p>
-                        <p class="credit-name credit-name-md">WhatAP Labs</p>
-                        <p class="credit-name-sub">Software Engineer · Observability</p>
-                    </div>
-
-                    <div class="credit-block">
-                        <p class="credit-role">Studying</p>
-                        <p class="credit-line">Compilers · Principles, Techniques, and Tools</p>
-                        <p class="credit-line">Software Architecture · Distributed Systems</p>
-                    </div>
-
-                    <div class="credit-block">
-                        <p class="credit-role">Past Performances</p>
-                        <table class="credit-table">
-                            <tr><td>2010—2017</td><td>Scratch indie games &amp; programs</td></tr>
-                            <tr><td>2015—2017</td><td>Minecraft server development</td></tr>
-                            <tr><td>2019—2020</td><td>Python indie projects</td></tr>
-                            <tr><td>2020</td><td>Sun Moon Univ. AI Software — top admission</td></tr>
-                            <tr><td>2020</td><td>CrowdWorks — QA Intern</td></tr>
-                            <tr><td>2020—2021</td><td>SW University Project — algorithm awards ×2</td></tr>
-                            <tr><td>2023—2024</td><td>Programming tutoring · Korea Univ. · U of Toronto</td></tr>
-                            <tr><td>2024</td><td>GyuChul Project</td></tr>
-                            <tr><td>2024—</td><td>Self-study · Compilers</td></tr>
-                        </table>
-                    </div>
-
-                    <div class="credit-block">
-                        <p class="credit-role">Cast</p>
-                        <p class="credit-line">The Computer · as itself</p>
-                        <p class="credit-line">The User · as the audience</p>
-                        <p class="credit-line">The Code · as the canvas</p>
-                    </div>
-
-                    <div class="credit-block">
-                        <p class="credit-role">Special Thanks</p>
-                        <p class="credit-line">to every line of code that has<br>taught me how to listen.</p>
-                    </div>
-
-                    <div class="credit-block credit-closing">
-                        <p class="credit-quote">
-                            "When I can no longer write software,<br>
-                            the curtain call of my life begins."
-                        </p>
-                        <p class="credit-quote-ko">
-                            소프트웨어를 할 수 없게 될 때,<br>
-                            나의 인생의 커튼콜이 시작된다.
-                        </p>
-                    </div>
-
-                    <div class="credit-block credit-contact">
-                        <p class="credit-role">Get in Touch</p>
-                        <a class="credit-link" href="mailto:minchul@whatap.io">minchul@whatap.io</a>
-                        <a class="credit-link credit-link-quiet" href="mailto:su9king@gmail.com">su9king@gmail.com</a>
-                        <div class="credit-link-row">
-                            <a class="credit-link-mini" href="https://github.com/su9king" target="_blank" rel="noopener">GitHub</a>
-                            <span class="credit-dot">·</span>
-                            <a class="credit-link-mini" href="https://www.linkedin.com/in/%EB%AF%BC%EC%B2%A0-%EC%8B%A0-ab1b6a312/" target="_blank" rel="noopener">LinkedIn</a>
-                            <span class="credit-dot">·</span>
-                            <a class="credit-link-mini" href="https://velog.io/@su9king/about" target="_blank" rel="noopener">Velog</a>
-                            <span class="credit-dot">·</span>
-                            <a class="credit-link-mini" href="https://brunch.co.kr/@d9fb71a239bc4a2" target="_blank" rel="noopener">Brunch</a>
-                        </div>
-                    </div>
-
-                    <div class="credit-block credit-final">
-                        <p class="credit-final-line">© 2026 Min-cheol Shin</p>
-                        <p class="credit-final-line credit-final-quiet">Thank you for watching.</p>
-                    </div>
-
-                    <div class="credit-spacer credit-spacer-end"></div>
+        <!-- 5: UI = DIMENSION -->
+        <section class="slide slide-dimension" data-slide="5">
+            <div class="dim-stage" id="dim-stage">
+                <div class="dim-scene">
+                    <div class="dim-layer dim-bg"></div>
+                    <div class="dim-layer dim-card"></div>
+                    <div class="dim-layer dim-bar"></div>
+                    <div class="dim-layer dim-button"></div>
+                    <div class="dim-layer dim-icon"></div>
                 </div>
             </div>
+            <div class="caption">
+                <p class="cap-ko">평평해 보였겠지만, 사실은 <em>조각</em>이었습니다.</p>
+                <p class="cap-en">You saw it flat. It was sculpture.</p>
+            </div>
         </section>
+
+        <!-- 6: OBSERVABILITY = MUSIC  (music begins here) -->
+        <section class="slide slide-music" data-slide="6">
+            <canvas id="music-canvas"></canvas>
+            <div class="caption">
+                <p class="cap-ko">서버는 지금도, 이런 그림을 그리고 있습니다.</p>
+                <p class="cap-en">Your servers paint this — every second.</p>
+            </div>
+        </section>
+
+        <!-- 7: CODE = SCULPTURE -->
+        <section class="slide slide-sculpture" data-slide="7">
+            <div class="sculpture-stage" id="sculpture-stage">
+                <pre class="sculpture-code" id="sculpture-code"></pre>
+            </div>
+            <div class="caption">
+                <p class="cap-ko">코드는 읽는 것이 아닙니다. <em>보는 것입니다</em>.</p>
+                <p class="cap-en">Code isn't read. It's seen.</p>
+            </div>
+        </section>
+
+        <!-- 8: AI = THE NEW BRUSH -->
+        <section class="slide slide-brush" data-slide="8">
+            <div class="brush-stage">
+                <div class="brush-prompt" id="brush-prompt">
+                    <span class="brush-cursor">▌</span>
+                </div>
+                <canvas id="brush-canvas"></canvas>
+            </div>
+            <div class="caption">
+                <p class="cap-ko">이제는, 캔버스가 <em>우리를 바라봅니다</em>.</p>
+                <p class="cap-en">Now — the canvas looks back.</p>
+            </div>
+        </section>
+
+        <!-- ════════════ ACT III — VERDICT ════════════ -->
+
+        <!-- 9: RECAPITULATION -->
+        <section class="slide slide-recap" data-slide="9">
+            <p class="line-ko">방금 보신 모든 것이, 소프트웨어였습니다.</p>
+            <p class="line-en">Each of these — was software.</p>
+        </section>
+
+        <!-- 10: SELF-CLAIM -->
+        <section class="slide slide-claim" data-slide="10">
+            <p class="line-ko"><em>나는 이 캔버스 위에 그림을 그리는 사람입니다.</em></p>
+            <p class="line-en">I am a painter on this canvas.</p>
+        </section>
+
+        <!-- 11: QUIET POEM -->
+        <section class="slide slide-quiet" data-slide="11">
+            <p class="line-ko">코드는 나를 거쳐 갈 뿐,</p>
+            <p class="line-ko line-ko-2">내가 쓰는 것이 아닙니다.</p>
+            <p class="line-en">The code passes through me. I do not write it.</p>
+        </section>
+
+        <!-- 12: SIGNATURE -->
+        <section class="slide slide-sign" data-slide="12">
+            <p class="sig-presents">a composition in software</p>
+            <h2 class="sig-name">Min Chul Shin</h2>
+            <p class="sig-name-ko">신민철 · b. 2001</p>
+            <p class="sig-role">2025 ~ 와탭 현재 재직중</p>
+            <a class="sig-mail" href="mailto:su9king@gmail.com">su9king@gmail.com</a>
+            <div class="sig-links">
+                <a href="https://github.com/su9king" target="_blank" rel="noopener">GitHub</a>
+                <span class="sig-dot">·</span>
+                <a href="https://www.linkedin.com/in/%EB%AF%BC%EC%B2%A0-%EC%8B%A0-ab1b6a312/" target="_blank" rel="noopener">LinkedIn</a>
+                <span class="sig-dot">·</span>
+                <a href="https://velog.io/@su9king/about" target="_blank" rel="noopener">Velog</a>
+                <span class="sig-dot">·</span>
+                <a href="https://brunch.co.kr/@d9fb71a239bc4a2" target="_blank" rel="noopener">Brunch</a>
+            </div>
+            <p class="sig-replay">— click to begin again —</p>
+        </section>
+
     </main>
 
-    <!-- HUD -->
+    <!-- HUD: audio toggle only -->
     <div class="hud">
-        <div class="hud-progress" id="hud-progress" aria-hidden="true">
-            <span class="hud-track"></span>
-            <span class="hud-fill" id="hud-fill"></span>
-        </div>
-        <div class="hud-counter" id="hud-counter" aria-hidden="true">01 / 08</div>
+        <button class="hud-audio" id="hud-audio" type="button" aria-label="toggle music" aria-pressed="true">
+            <span class="hud-audio-on">♪ on</span>
+            <span class="hud-audio-off">♪ off</span>
+        </button>
+    </div>
+
+    <!-- Background music (drop your own music.mp3 in the repo root) -->
+    <audio id="bgm" src="music.mp3" preload="auto" loop></audio>
+
+    <div class="progress-bar" aria-hidden="true">
+        <span class="progress-fill" id="progress-fill"></span>
     </div>
 
     <div class="hint" id="hint" aria-hidden="true">
-        <span class="hint-key">▸</span>
+        <span class="hint-arrow">▸</span>
         <span class="hint-text">press any key</span>
     </div>
 
-    <div class="lang-toggle">
-        <button class="lang-btn is-active" data-lang="ko" type="button">KO</button>
-        <span class="lang-dot">·</span>
-        <button class="lang-btn" data-lang="en" type="button">EN</button>
-    </div>
+    <div class="flash" id="flash" aria-hidden="true"></div>
 
     <script src="script.js"></script>
 </body>
