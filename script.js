@@ -140,14 +140,21 @@
 
     /* ===================== PER-SLIDE ANIMATIONS ===================== */
 
+    // Map slide *classes* to animations so the trigger never goes stale
+    // when slides are reordered.
     function triggerSlideEnter(n) {
-        switch (n) {
-            case 5:  SlideAnim.startNegative();  break; // UI: negative space
-            case 6:  /* CSS handles the 3D reveal */ break;
-            case 7:  SlideAnim.startMusic();     break; // observability waveforms
-            case 8:  SlideAnim.startSculpture(); break; // code as sculpture
-            case 10: SlideAnim.startBrush();     break; // AI brush
-        }
+        const slide = slides[n - 1];
+        if (!slide) return;
+        if (slide.classList.contains('slide-negative'))  SlideAnim.startNegative();
+        if (slide.classList.contains('slide-music'))     SlideAnim.startMusic();
+        if (slide.classList.contains('slide-sculpture')) SlideAnim.startSculpture();
+        if (slide.classList.contains('slide-brush'))     SlideAnim.startBrush();
+        // slide-dimension is handled entirely by CSS transforms.
+    }
+
+    function activeHasClass(cls) {
+        const a = document.querySelector('.slide.is-active');
+        return !!(a && a.classList.contains(cls));
     }
 
     /* ============================================================
@@ -333,7 +340,7 @@ const today = new Composition("be honest.");`;
 
         function loopNegative(t) {
             if (!negRunning) return;
-            if (current !== 4) { negRunning = false; return; }
+            if (!activeHasClass('slide-negative')) { negRunning = false; return; }
 
             const dt = (t - negStart) / 1000;
 
@@ -401,7 +408,7 @@ const today = new Composition("be honest.");`;
 
         function loopMusic(t) {
             if (!musicRunning) return;
-            if (current !== 7) { musicRunning = false; return; }
+            if (!activeHasClass('slide-music')) { musicRunning = false; return; }
 
             const w = musicCanvas.clientWidth;
             const h = musicCanvas.clientHeight;
@@ -484,7 +491,7 @@ const today = new Composition("be honest.");`;
 
         function loopBrush(t) {
             if (!brushRunning) return;
-            if (current !== 8) { brushRunning = false; return; }
+            if (!activeHasClass('slide-brush')) { brushRunning = false; return; }
 
             const dt = (t - brushStart) / 1000;
             const w = brushCanvas.clientWidth;
@@ -607,24 +614,27 @@ const today = new Composition("be honest.");`;
 
         // Per-slide intensity profile.
         // [lowpass cutoff Hz, gain (0..1)]
-        // Climax sits at slide 13 (the self-claim) — the loudest, widest moment.
+        // The piece breathes shallowly through the setup, fills out as
+        // we lay the proofs, and bursts open at slide 15 (the self-claim).
         const PROFILES = {
-            1:  [ 500,  0.28],   // title
-            2:  [ 600,  0.32],   // self-aware
-            3:  [ 700,  0.36],   // provocation
-            4:  [ 900,  0.42],   // promise
-            5:  [1200,  0.50],   // UI: negative space
-            6:  [1700,  0.58],   // UI: dimension
-            7:  [2400,  0.66],   // observability
-            8:  [3500,  0.74],   // code
-            9:  [5500,  0.80],   // bridge: tool paints by itself
-            10: [9000,  0.86],   // AI
-            11: [13000, 0.92],   // recap
-            12: [18000, 0.96],   // who paints all of this?
-            13: [22050, 1.00],   // self-claim — PEAK
-            14: [3000,  0.55],   // quiet poem (pull back)
-            15: [1500,  0.42],   // devotion
-            16: [800,   0.00],   // signature fade-out
+            1:  [ 500,  0.26],   // title
+            2:  [ 580,  0.30],   // self-aware
+            3:  [ 680,  0.34],   // provocation
+            4:  [ 800,  0.38],   // "what is art?"
+            5:  [ 950,  0.43],   // art is heart taking shape
+            6:  [1100,  0.48],   // composition / time / hand
+            7:  [1300,  0.54],   // bridge → software
+            8:  [1700,  0.60],   // proof: composition (UI negative)
+            9:  [2200,  0.66],   // proof: dimension (UI sculpture)
+            10: [3000,  0.72],   // proof: time (observability)
+            11: [4500,  0.78],   // proof: code structure
+            12: [7000,  0.84],   // proof: AI / new medium
+            13: [11000, 0.90],   // recap
+            14: [16000, 0.94],   // who paints all of this?
+            15: [22050, 1.00],   // SELF-CLAIM — peak, fully open
+            16: [3000,  0.55],   // quiet poem
+            17: [1500,  0.42],   // devotion
+            18: [800,   0.00],   // signature fade-out
         };
 
         function attachDiagnostics() {

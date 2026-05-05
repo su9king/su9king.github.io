@@ -17,7 +17,7 @@
 
     <main class="deck" id="deck">
 
-        <!-- ════════════ ACT I — DECLARATION ════════════ -->
+        <!-- ════════════ ACT I — HOOK ════════════ -->
 
         <!-- 1: TITLE -->
         <section class="slide slide-title is-active" data-slide="1">
@@ -25,7 +25,7 @@
             <p class="title-en">Software is Art.</p>
         </section>
 
-        <!-- 2: SELF-AWARE BREATH -->
+        <!-- 2: SELF-AWARE -->
         <section class="slide slide-prose" data-slide="2">
             <p class="line-ko">지금 당신은, <em>소프트웨어를 보고 있습니다</em>.</p>
             <p class="line-en">Right now — you are looking at software.</p>
@@ -37,30 +37,48 @@
             <p class="line-en">You don't believe me.</p>
         </section>
 
-        <!-- 4: PROMISE -->
+        <!-- ════════════ ACT II — WHAT IS ART? ════════════ -->
+
+        <!-- 4: DEFINITION SETUP -->
         <section class="slide slide-prose" data-slide="4">
-            <p class="line-ko">딱 네 가지만 보여드리겠습니다.</p>
-            <p class="line-en">Watch four things with me.</p>
-            <div class="promise-dots" aria-hidden="true">
-                <span></span><span></span><span></span><span></span>
-            </div>
+            <p class="line-ko">잠시, <em>예술이 무엇인지</em>부터 같이 떠올려 보시죠.</p>
+            <p class="line-en">First — let's recall what art is.</p>
         </section>
 
-        <!-- ════════════ ACT II — FOUR PROOFS ════════════ -->
+        <!-- 5: DEFINITION CORE -->
+        <section class="slide slide-prose" data-slide="5">
+            <p class="line-ko">예술은,</p>
+            <p class="line-ko line-ko-2">누군가의 <em>마음</em>이 형태가 되어, 우리에게 닿는 일입니다.</p>
+            <p class="line-en">Art is a person's heart, taking shape, reaching us.</p>
+        </section>
 
-        <!-- 5: UI = NEGATIVE SPACE -->
-        <section class="slide slide-negative" data-slide="5">
+        <!-- 6: DEFINITION AXES -->
+        <section class="slide slide-prose" data-slide="6">
+            <p class="line-ko">거기에는 — <em>구성</em>과 <em>시간</em>과 <em>손길</em>이 있습니다.</p>
+            <p class="line-en">In it: composition, time, and the hand.</p>
+        </section>
+
+        <!-- 7: BRIDGE — and software? -->
+        <section class="slide slide-prose" data-slide="7">
+            <p class="line-ko">그렇다면 — 소프트웨어는 어떻습니까?</p>
+            <p class="line-en">Then — what about software?</p>
+        </section>
+
+        <!-- ════════════ ACT III — FIVE PROOFS ════════════ -->
+
+        <!-- 8: UI = NEGATIVE SPACE  (composition) -->
+        <section class="slide slide-negative" data-slide="8">
             <div class="negative-stage" id="negative-stage">
                 <canvas id="negative-canvas"></canvas>
             </div>
             <div class="caption">
-                <p class="cap-ko">그림은, 사실 <em>빈 자리</em>에 있었습니다.</p>
-                <p class="cap-en">The real painting was in the empty spaces.</p>
+                <p class="cap-ko"><em>구성</em>은 — 그림이 아니라, <em>빈 자리</em>에도 있었습니다.</p>
+                <p class="cap-en">Composition — was also in the empty space.</p>
             </div>
         </section>
 
-        <!-- 6: UI = DIMENSION -->
-        <section class="slide slide-dimension" data-slide="6">
+        <!-- 9: UI = DIMENSION  (the hand reaches into depth) -->
+        <section class="slide slide-dimension" data-slide="9">
             <div class="dim-stage" id="dim-stage">
                 <div class="dim-scene">
                     <div class="dim-layer dim-bg"></div>
@@ -71,39 +89,33 @@
                 </div>
             </div>
             <div class="caption">
-                <p class="cap-ko">평평해 보였겠지만, 사실은 <em>조각</em>이었습니다.</p>
-                <p class="cap-en">You saw it flat. It was sculpture.</p>
+                <p class="cap-ko"><em>손길</em>은 — 평평한 화면 너머까지, 깊이를 빚습니다.</p>
+                <p class="cap-en">The hand — shapes depth even beyond the flat.</p>
             </div>
         </section>
 
-        <!-- 7: OBSERVABILITY = MUSIC  (no jargon — just flowing waves) -->
-        <section class="slide slide-music" data-slide="7">
+        <!-- 10: OBSERVABILITY  (time) -->
+        <section class="slide slide-music" data-slide="10">
             <canvas id="music-canvas"></canvas>
             <div class="caption">
-                <p class="cap-ko">당신이 쓰는 모든 앱은, 매 순간 <em>이런 그림을 그리고 있습니다</em>.</p>
-                <p class="cap-en">Every app you use is painting this — every second.</p>
+                <p class="cap-ko"><em>시간</em>은 — 당신이 쓰는 모든 앱 안에서, 매 순간 이렇게 흐릅니다.</p>
+                <p class="cap-en">Time — flows like this, every second, inside every app you use.</p>
             </div>
         </section>
 
-        <!-- 8: CODE = SCULPTURE -->
-        <section class="slide slide-sculpture" data-slide="8">
+        <!-- 11: CODE = SCULPTURE  (composition again, in letters) -->
+        <section class="slide slide-sculpture" data-slide="11">
             <div class="sculpture-stage" id="sculpture-stage">
                 <pre class="sculpture-code" id="sculpture-code"></pre>
             </div>
             <div class="caption">
-                <p class="cap-ko">코드는 읽는 것이 아닙니다. <em>보는 것입니다</em>.</p>
-                <p class="cap-en">Code isn't read. It's seen.</p>
+                <p class="cap-ko">그 <em>구성</em>이 — 글자 한 줄 한 줄에도 있습니다.</p>
+                <p class="cap-en">That same composition — lives in every line of code.</p>
             </div>
         </section>
 
-        <!-- 9: BRIDGE — A NEW MEDIUM ARRIVES -->
-        <section class="slide slide-prose" data-slide="9">
-            <p class="line-ko">그러던 어느 날, 도구가 <em>스스로</em> 그리기 시작했습니다.</p>
-            <p class="line-en">And then — the tool began to paint by itself.</p>
-        </section>
-
-        <!-- 10: AI = THE NEW BRUSH -->
-        <section class="slide slide-brush" data-slide="10">
+        <!-- 12: AI = THE NEW BRUSH  (the medium becomes an agent) -->
+        <section class="slide slide-brush" data-slide="12">
             <div class="brush-stage">
                 <div class="brush-prompt" id="brush-prompt">
                     <span class="brush-cursor">▌</span>
@@ -111,46 +123,46 @@
                 <canvas id="brush-canvas"></canvas>
             </div>
             <div class="caption">
-                <p class="cap-ko">이제는, 캔버스가 <em>우리를 바라봅니다</em>.</p>
-                <p class="cap-en">Now — the canvas looks back.</p>
+                <p class="cap-ko">그리고 — 이제는, 매체가 <em>스스로 그립니다</em>.</p>
+                <p class="cap-en">And — now, the medium paints by itself.</p>
             </div>
         </section>
 
-        <!-- ════════════ ACT III — VERDICT ════════════ -->
+        <!-- ════════════ ACT IV — VERDICT ════════════ -->
 
-        <!-- 11: RECAPITULATION -->
-        <section class="slide slide-recap" data-slide="11">
+        <!-- 13: RECAP -->
+        <section class="slide slide-recap" data-slide="13">
             <p class="line-ko">방금 보신 모든 것이, 소프트웨어였습니다.</p>
             <p class="line-en">Each of these — was software.</p>
         </section>
 
-        <!-- 12: BRIDGE — WHO MAKES IT? -->
-        <section class="slide slide-prose" data-slide="12">
+        <!-- 14: WHO MAKES IT? -->
+        <section class="slide slide-prose" data-slide="14">
             <p class="line-ko">그렇다면, 이 모든 것을 <em>그리는 사람</em>은 — 무엇입니까?</p>
             <p class="line-en">Then — who paints all of this?</p>
         </section>
 
-        <!-- 13: SELF-CLAIM -->
-        <section class="slide slide-claim" data-slide="13">
+        <!-- 15: SELF-CLAIM (CLIMAX) -->
+        <section class="slide slide-claim" data-slide="15">
             <p class="line-ko"><em>나는 이 캔버스 위에 그림을 그리는 사람입니다.</em></p>
             <p class="line-en">I am a painter on this canvas.</p>
         </section>
 
-        <!-- 14: QUIET POEM -->
-        <section class="slide slide-quiet" data-slide="14">
+        <!-- 16: QUIET POEM -->
+        <section class="slide slide-quiet" data-slide="16">
             <p class="line-ko">코드는 나를 거쳐 갈 뿐,</p>
             <p class="line-ko line-ko-2">내가 쓰는 것이 아닙니다.</p>
             <p class="line-en">The code passes through me. I do not write it.</p>
         </section>
 
-        <!-- 15: DEVOTION (humble, not autobiographical) -->
-        <section class="slide slide-quiet" data-slide="15">
+        <!-- 17: DEVOTION -->
+        <section class="slide slide-quiet" data-slide="17">
             <p class="line-ko">오늘도, <em>한 줄을 더</em> 쓸 뿐입니다.</p>
             <p class="line-en">Today again — just one more line.</p>
         </section>
 
-        <!-- 16: SIGNATURE -->
-        <section class="slide slide-sign" data-slide="16">
+        <!-- 18: SIGNATURE -->
+        <section class="slide slide-sign" data-slide="18">
             <p class="sig-presents">a composition in software</p>
             <h2 class="sig-name">Min Chul Shin</h2>
             <p class="sig-name-ko">신민철 · b. 2001</p>
