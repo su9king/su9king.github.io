@@ -142,11 +142,11 @@
 
     function triggerSlideEnter(n) {
         switch (n) {
-            case 4: SlideAnim.startNegative(); break;
-            case 5: /* CSS handles the 3D reveal */ break;
-            case 6: SlideAnim.startMusic(); break;
-            case 7: SlideAnim.startSculpture(); break;
-            case 8: SlideAnim.startBrush(); break;
+            case 5:  SlideAnim.startNegative();  break; // UI: negative space
+            case 6:  /* CSS handles the 3D reveal */ break;
+            case 7:  SlideAnim.startMusic();     break; // observability waveforms
+            case 8:  SlideAnim.startSculpture(); break; // code as sculpture
+            case 10: SlideAnim.startBrush();     break; // AI brush
         }
     }
 
@@ -182,15 +182,21 @@
     ];
 
     /* ============================================================
-       SLIDE 6: Observability sparklines
+       SLIDE 7: Observability — flowing layered waveforms.
+       Deliberately label-free so non-engineers see the *picture*,
+       not jargon. The argument lives in the visual itself.
        ============================================================ */
     const musicCanvas = document.getElementById('music-canvas');
     const musicCtx    = musicCanvas.getContext('2d');
-    const musicTracks = [
-        { name: 'HEARTBEAT',  buf: new Array(64).fill(0), kind: 'wave',  bpm: 60 },
-        { name: 'MEMORY',     buf: new Array(64).fill(0), kind: 'area',  bpm: 30 },
-        { name: 'LATENCY',    buf: new Array(40).fill(0), kind: 'cells', bpm: 90 },
-        { name: 'THROUGHPUT', buf: new Array(64).fill(0), kind: 'spark', bpm: 75 },
+    // 6 horizontal waveforms at slightly different rates, like layered
+    // pulses of different systems breathing together.
+    const musicWaves = [
+        { rate: 1.00, amp: 0.28, harm: 1.7, gold: false, weight: 1.4 },
+        { rate: 1.35, amp: 0.20, harm: 2.3, gold: true,  weight: 1.0 },
+        { rate: 0.72, amp: 0.34, harm: 1.3, gold: false, weight: 1.2 },
+        { rate: 1.62, amp: 0.16, harm: 2.7, gold: true,  weight: 0.9 },
+        { rate: 0.93, amp: 0.24, harm: 1.9, gold: false, weight: 1.1 },
+        { rate: 1.21, amp: 0.18, harm: 2.1, gold: true,  weight: 1.0 },
     ];
 
     /* ============================================================
@@ -395,7 +401,7 @@ const today = new Composition("be honest.");`;
 
         function loopMusic(t) {
             if (!musicRunning) return;
-            if (current !== 6) { musicRunning = false; return; }
+            if (current !== 7) { musicRunning = false; return; }
 
             const w = musicCanvas.clientWidth;
             const h = musicCanvas.clientHeight;
@@ -403,124 +409,44 @@ const today = new Composition("be honest.");`;
 
             musicCtx.clearRect(0, 0, w, h);
 
-            // Layout: 4 horizontal tracks
-            const padL = Math.max(120, w * 0.08);
-            const padR = Math.max(60, w * 0.05);
-            const padT = h * 0.18;
-            const padB = h * 0.22;
+            // Stack the waves vertically with generous breathing room.
+            const padL = w * 0.06;
+            const padR = w * 0.06;
+            const padT = h * 0.16;
+            const padB = h * 0.26; // extra room for the caption
             const innerW = w - padL - padR;
             const innerH = h - padT - padB;
-            const trackH = innerH / musicTracks.length;
-            const valX = padL + 100;
-            const valW = w - valX - padR;
+            const slot = innerH / musicWaves.length;
 
-            for (let i = 0; i < musicTracks.length; i++) {
-                const tr = musicTracks[i];
-                const ty = padT + i * trackH;
-                const cy = ty + trackH * 0.5;
-
-                // label
-                musicCtx.fillStyle = 'rgba(106, 99, 87, 1)';
-                musicCtx.font = `400 11px 'Inter', sans-serif`;
-                musicCtx.textBaseline = 'middle';
-                musicCtx.textAlign = 'left';
-                musicCtx.fillText(tr.name.split('').join('  '), padL, cy);
-
-                // shift buffer
-                const phase = (dt * tr.bpm / 60) * Math.PI * 2;
-                const newVal = Math.max(0, Math.min(1,
-                    0.5 + Math.sin(phase + i) * 0.3 + (Math.random() - 0.5) * 0.15
-                ));
-                tr.buf.shift();
-                tr.buf.push(newVal);
-
-                // draw
-                if (tr.kind === 'wave') {
-                    drawWaveTrack(musicCtx, valX, ty, valW, trackH, tr, dt);
-                } else if (tr.kind === 'area') {
-                    drawAreaTrack(musicCtx, valX, ty, valW, trackH, tr);
-                } else if (tr.kind === 'cells') {
-                    drawCellsTrack(musicCtx, valX, ty, valW, trackH, tr);
-                } else if (tr.kind === 'spark') {
-                    drawSparkTrack(musicCtx, valX, ty, valW, trackH, tr);
-                }
+            for (let i = 0; i < musicWaves.length; i++) {
+                const wave = musicWaves[i];
+                const cy   = padT + slot * (i + 0.5);
+                drawFlowingWave(musicCtx, padL, cy, innerW, slot, wave, dt, i);
             }
 
             requestAnimationFrame(loopMusic);
         }
 
-        function drawWaveTrack(ctx, x, y, w, h, tr, dt) {
-            const cy = y + h * 0.5;
-            const intensity = 0.7;
-            ctx.strokeStyle = `rgba(201, 163, 91, ${0.55 + intensity * 0.4})`;
-            ctx.lineWidth = 1.2;
+        function drawFlowingWave(ctx, x, cy, w, slotH, wave, dt, idx) {
+            const amp = slotH * wave.amp;
+            ctx.strokeStyle = wave.gold
+                ? `rgba(201, 163, 91, 0.78)`
+                : `rgba(245, 239, 226, 0.55)`;
+            ctx.lineWidth   = wave.weight;
+            ctx.lineCap     = 'round';
+            ctx.lineJoin    = 'round';
+
             ctx.beginPath();
-            const N = Math.max(60, Math.floor(w / 3));
+            const N = Math.max(80, Math.floor(w / 3));
+            const speed = 1.4 * wave.rate;
             for (let i = 0; i <= N; i++) {
                 const px = x + (i / N) * w;
-                const phase = (i / N) * Math.PI * 4 - dt * 2.4;
-                let py = cy + Math.sin(phase) * h * 0.16;
-                const sp = ((i / N) * 4 - dt * 0.7 / Math.PI) % 1;
-                if (sp > 0.45 && sp < 0.55) {
-                    const k = (sp - 0.5) / 0.05;
-                    py -= Math.sign(k) * h * 0.30 * (1 - Math.abs(k));
-                }
-                if (i === 0) ctx.moveTo(px, py);
-                else         ctx.lineTo(px, py);
-            }
-            ctx.stroke();
-        }
-
-        function drawAreaTrack(ctx, x, y, w, h, tr) {
-            const buf = tr.buf;
-            const N = buf.length;
-            const cy = y + h * 0.5;
-            const range = h * 0.4;
-
-            const grad = ctx.createLinearGradient(x, 0, x + w, 0);
-            grad.addColorStop(0, 'rgba(201, 163, 91, 0.5)');
-            grad.addColorStop(1, 'rgba(201, 163, 91, 0.85)');
-            ctx.fillStyle = grad;
-
-            ctx.beginPath();
-            ctx.moveTo(x, cy);
-            for (let i = 0; i < N; i++) {
-                const px = x + (i / (N - 1)) * w;
-                const py = cy - (buf[i] - 0.5) * range;
-                ctx.lineTo(px, py);
-            }
-            ctx.lineTo(x + w, cy);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        function drawCellsTrack(ctx, x, y, w, h, tr) {
-            const buf = tr.buf;
-            const N = buf.length;
-            const cellW = w / N;
-            const cellH = h * 0.55;
-            const cy = y + h * 0.5 - cellH * 0.5;
-            for (let i = 0; i < N; i++) {
-                const v = buf[i];
-                const a = 0.10 + v * 0.85;
-                ctx.fillStyle = v > 0.7
-                    ? `rgba(201, 163, 91, ${a})`
-                    : `rgba(245, 239, 226, ${a * 0.7})`;
-                ctx.fillRect(x + i * cellW + 0.5, cy, Math.max(1, cellW - 1.5), cellH);
-            }
-        }
-
-        function drawSparkTrack(ctx, x, y, w, h, tr) {
-            const buf = tr.buf;
-            const N = buf.length;
-            const cy = y + h * 0.5;
-            const range = h * 0.42;
-            ctx.strokeStyle = 'rgba(245, 239, 226, 0.85)';
-            ctx.lineWidth = 1.0;
-            ctx.beginPath();
-            for (let i = 0; i < N; i++) {
-                const px = x + (i / (N - 1)) * w;
-                const py = cy - (buf[i] - 0.5) * range;
+                const u  = (i / N) * Math.PI * 6 - dt * speed;
+                // layered sines = organic wobble, never quite repeating.
+                const py = cy
+                    + Math.sin(u) * amp
+                    + Math.sin(u * wave.harm + idx * 0.7) * amp * 0.45
+                    + Math.sin(u * 0.31 - dt * 0.3 + idx) * amp * 0.18;
                 if (i === 0) ctx.moveTo(px, py);
                 else         ctx.lineTo(px, py);
             }
@@ -680,20 +606,25 @@ const today = new Composition("be honest.");`;
         let elementRamp = 0; // rAF id for fallback element-volume ramping
 
         // Per-slide intensity profile.
-        // [filterHz, gain]
+        // [lowpass cutoff Hz, gain (0..1)]
+        // Climax sits at slide 13 (the self-claim) — the loudest, widest moment.
         const PROFILES = {
-            1:  [ 500,  0.30],
-            2:  [ 700,  0.36],
-            3:  [ 950,  0.44],
-            4:  [1300,  0.52],
-            5:  [1800,  0.60],
-            6:  [2600,  0.68],
-            7:  [4000,  0.76],
-            8:  [7000,  0.84],
-            9:  [12000, 0.92],
-            10: [22050, 1.00],   // peak — fully open, full volume
-            11: [1400,  0.55],   // pull back for the quiet poem
-            12: [800,   0.00],   // fade out as signature settles
+            1:  [ 500,  0.28],   // title
+            2:  [ 600,  0.32],   // self-aware
+            3:  [ 700,  0.36],   // provocation
+            4:  [ 900,  0.42],   // promise
+            5:  [1200,  0.50],   // UI: negative space
+            6:  [1700,  0.58],   // UI: dimension
+            7:  [2400,  0.66],   // observability
+            8:  [3500,  0.74],   // code
+            9:  [5500,  0.80],   // bridge: tool paints by itself
+            10: [9000,  0.86],   // AI
+            11: [13000, 0.92],   // recap
+            12: [18000, 0.96],   // who paints all of this?
+            13: [22050, 1.00],   // self-claim — PEAK
+            14: [3000,  0.55],   // quiet poem (pull back)
+            15: [1500,  0.42],   // devotion
+            16: [800,   0.00],   // signature fade-out
         };
 
         function attachDiagnostics() {
